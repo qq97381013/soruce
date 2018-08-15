@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <servers>
+        <server>
+            <id>nexusMirror</id>
+            <username>私服用户名</username>
+            <password>私服密码</password>
+        </server>
+        <server>
+            <id>snapshots</id>
+            <username>私服用户名</username>
+            <password>私服密码</password>
+        </server>
+        <server>
+            <id>releases</id>
+            <username>私服用户名</username>
+            <password>私服密码</password>
+        </server>
+    </servers>
+    <mirrors>
+        <mirror>
+            <id>nexusMirror</id>
+            <name>all repository of public third party releases</name>
+            <mirrorOf>*</mirrorOf>
+            <url>私服 public url</url>
+        </mirror>
+    </mirrors>
+    <profiles>
+        <profile>
+            <id>nexus</id>
+            <repositories>
+                <repository>
+                    <id>nexus</id>
+                    <name>local private nexus</name>
+                    <url>私服 public url</url>
+                    <releases><enabled>true</enabled>
+                        <checksumPolicy>warn</checksumPolicy></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>nexus</id>
+                    <name>local private nexus</name>
+                    <url>私服 public url</url>
+                    <releases><enabled>true</enabled>
+                        <checksumPolicy>warn</checksumPolicy></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>nexus</activeProfile>
+    </activeProfiles>
+</settings>
