@@ -1,0 +1,49 @@
+1、（H35）是不是原声zookeeper不可以创建/path/path节点，只有通过ZKClient创建啊？
+回复：
+原生zk可以通过 create 命令创建一个znode节点，不支持级联创建
+用客户端工具，可以实现级联创建，其实是底层执行了多个create而已
+
+
+2、（J64）watcher实现监听或通知的原理：
+为什么在命令行下更改节点数据，应用程序能够监听到，是程序通过心跳方式定时检查节点状态，还是由zk主动向程序发出通知？原理是如何实现的？
+回复：参考 https://www.cnblogs.com/shamo89/p/9787176.html
+
+
+3、（M51）pzxid的含义？
+回复：PXID表示的意思为：当前节点的最后一个子节点修改的zxid。如/B/[b1,b2,b3]这棵树，现在新增一个节点b4，其zxid为0x20000004，则/B节点的pxid=0x20000004
+
+
+4、（D44）如果A创建了节点设置了权限  那么B想操作这个节点怎么做？
+回复：B需要获取ACL授权　
+示例代码 :https://www.cnblogs.com/wangxiaowei/p/3315137.html
+
+5、（M90）在设置用户密码 后，其他终端通过 getAcl /abc   命令是能获取到用户账号和密码 这个不合理吧？
+回复：这里的密码是密文
+参考：https://blog.csdn.net/idler_bm/article/details/51004140
+示例代码 https://blog.csdn.net/qq_17089617/article/details/77959377
+
+
+6、问题(M14)  
+Watcher一次监听的问题每次都需要在process方法中调用exists(event.getPath())才能监听到下一次事件？
+
+回复：Watcher通知是一次性的，即一旦触发一次通知后，该Watcher就失效了，因此客户端需要反复注册Watcher，即程序中在process里面又注册了Watcher
+注册Watcher的方式：
+1、构造方法中传入一个默认的Watcher对象
+2、调用 getData() , getChildren() , exist() 三个接口向 Zookeeper 服务器注册Watcher
+
+
+7、问题（M14）节点删除不成功
+抛出异常BadVersionException : KeeperErrorCode = BadVersion for
+
+回复：可以把znode的version，理解成CAS中的 V，每次更新之前都会比较其值是否是预期值A，只有符合预期，才会将V原子化地更新到新值B。
+Zookeeper的version参数可以对应预期值，表明是针对哪个数据版本进行更新，假如一个客户端试图进行更新操作，它会携带上次获取到的version值进行更新，
+而如果这段时间内，Zookeeper服务器上该节点的数据已经被其他客户端更新，那么其数据版本也会相应更新，而客户端携带的version将无法匹配，无法更新成功
+，因此可以有效地避免分布式更新的并发问题
+
+
+8、问题：（H10）如果我从数据库中查询出来一个list，需要处理这个list，组装成页面需要的数据，需要三层for循环，大佬都是怎么处理的？
+就是我在遍历要取出来的数据还需要遍历其他两个list的数据
+
+回复：不建议这么搞，试下单独建一张业务表，异步去维护这张表
+
+
