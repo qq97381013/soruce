@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="tool" content="leanote-desktop-app">
+<title>第二节:spring源码解析之扩展原理BeanFactoryPostProcessor和BeanDefinitionPostProcessor和ApplicationListener</title>
+<style>
+
+*{font-family:"lucida grande","lucida sans unicode",lucida,helvetica,"Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;}
+
+body {
+  margin: 0;
+}
+
+/*公用文字样式*/
+h1{font-size:30px}h2{font-size:24px}h3{font-size:18px}h4{font-size:14px}
+.note-container{
+    width:850px; 
+    margin:auto;
+    padding: 10px 20px;
+    box-shadow: 1px 1px 10px #eee;
+}
+#title {
+  margin: 0;
+}
+table {
+    margin-bottom: 16px;
+    border-collapse: collapse;
+}
+table th, table td {
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+}
+table th {
+    font-weight: bold;
+}
+
+table tr {
+    background-color: none;
+    border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+    background-color: rgb(247, 247, 249);
+}
+.mce-item-table, .mce-item-table td, .mce-item-table th, .mce-item-table caption {
+  border: 1px solid #ddd;
+  border-collapse: collapse;
+  padding: 6px 13px;
+}
+blockquote {
+  border-left-width:10px;
+  background-color:rgba(128,128,128,0.05);
+  border-top-right-radius:5px;
+  border-bottom-right-radius:5px;
+  padding:15px 20px;
+  border-left:5px solid rgba(128,128,128,0.075);
+}
+blockquote p {
+  margin-bottom:1.1em;
+  font-size:1em;
+  line-height:1.45
+}
+blockquote ul:last-child,blockquote ol:last-child {
+  margin-bottom:0
+}
+pre {
+  padding: 18px;
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+  border-radius: 3px;
+  display: block;
+}
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  white-space: nowrap;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+.footnote {
+  vertical-align: top;
+  position: relative;
+  top: -0.5em;
+  font-size: .8em;
+}
+
+hr {
+  margin:2em 0
+}
+img {
+  max-width:100%
+}
+pre {
+  word-break:break-word
+}
+p,pre,pre.prettyprint,blockquote {
+  margin:0 0 1.1em
+}
+hr {
+  margin:2em 0
+}
+img {
+  max-width:100%
+}
+.sequence-diagram,.flow-chart {
+  text-align:center;
+  margin-bottom:1.1em
+}
+.sequence-diagram text,.flow-chart text {
+  font-size:15px !important;
+  font-family:"Source Sans Pro",sans-serif !important
+}
+.sequence-diagram [fill="#ffffff"],.flow-chart [fill="#ffffff"] {
+  fill:#f6f6f6
+}
+.sequence-diagram [stroke="#000000"],.flow-chart [stroke="#000000"] {
+  stroke:#3f3f3f
+}
+.sequence-diagram text[stroke="#000000"],.flow-chart text[stroke="#000000"] {
+  stroke:none
+}
+.sequence-diagram [fill="#000"],.flow-chart [fill="#000"],.sequence-diagram [fill="#000000"],.flow-chart [fill="#000000"],.sequence-diagram [fill="black"],.flow-chart [fill="black"] {
+  fill:#3f3f3f
+}
+ul,ol {
+  margin-bottom:1.1em
+}
+ul ul,ol ul,ul ol,ol ol {
+  margin-bottom:1.1em
+}
+kbd {
+  padding:.1em .6em;
+  border:1px solid rgba(63,63,63,0.25);
+  -webkit-box-shadow:0 1px 0 rgba(63,63,63,0.25);
+  box-shadow:0 1px 0 rgba(63,63,63,0.25);
+  font-size:.7em;
+  font-family:sans-serif;
+  background-color:#fff;
+  color:#333;
+  border-radius:3px;
+  display:inline-block;
+  margin:0 .1em;
+  white-space:nowrap
+}
+.toc ul {
+  list-style-type:none;
+  margin-bottom:15px
+}
+</style>
+<!-- 该css供自定义样式 -->
+<link href="../leanote-html.css" rel="stylesheet">
+</head>
+
+<body>
+
+	<div class="note-container">
+		<h1 class="title" id="leanote-title">第二节:spring源码解析之扩展原理BeanFactoryPostProcessor和BeanDefinitionPostProcessor和ApplicationListener</h1>
+		<div class="content-html" id="leanote-content"><p><span style="font-size: 24px; line-height: 34.2857px; color: #ff0000;" data-mce-style="font-size: 24px; line-height: 34.2857px; color: #ff0000;"><strong>一:Spring是如何发布事件的? ApplicationListener</strong></span></p><p><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;"><strong>1.1)自己写一个TulingApplicationListener 实现ApplicationListener​接口,并且把该组件加入到容器中.</strong></span></p><pre id="leanote_ace_1558964514199_0" class="ace-tomorrow" data-mce-style="line-height: 1.5; font-size: 14px; height: 630px;">@Component
+public&nbsp;class&nbsp;TulingApplicationListener&nbsp;implements&nbsp;ApplicationListener&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;//接受到消息，回调该方法
+&nbsp;&nbsp;&nbsp;&nbsp;@Override
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;onApplicationEvent(ApplicationEvent&nbsp;event)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("TulingApplicationListener&nbsp;接受到了一个事件"+event);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;static&nbsp;void&nbsp;main(String[]&nbsp;args)&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AnnotationConfigApplicationContext&nbsp;ctx&nbsp;=&nbsp;new&nbsp;AnnotationConfigApplicationContext(MainConfig.class);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//手动发布一个事件
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctx.publishEvent(new&nbsp;ApplicationEvent("我手动发布了一个事件")&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Override
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Object&nbsp;getSource()&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;super.getSource();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//容器关闭也发布事件
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctx.close();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+测试结果:
+TulingApplicationListener&nbsp;接受到了一个事件org.springframework.context.event.ContextRefreshedEvent[source=org.springframework.context.annotation.AnnotationConfigApplicationContext@37bba400:&nbsp;startup&nbsp;date&nbsp;[Mon&nbsp;May&nbsp;27&nbsp;21:42:51&nbsp;CST&nbsp;2019];&nbsp;root&nbsp;of&nbsp;context&nbsp;hierarchy]
+TulingApplicationListener&nbsp;接受到了一个事件com.tuling.testapplicationlistener.MainClass$1[source=我手动发布了一个事件]
+TulingApplicationListener&nbsp;接受到了一个事件org.springframework.context.event.ContextClosedEvent[source=org.springframework.context.annotation.AnnotationConfigApplicationContext@37bba400:&nbsp;startup&nbsp;date&nbsp;[Mon&nbsp;May&nbsp;27&nbsp;21:42:51&nbsp;CST&nbsp;2019];&nbsp;root&nbsp;of&nbsp;context&nbsp;hierarchy]
+&nbsp;&nbsp;&nbsp;&nbsp;</pre><p><span style="font-size: 24px; line-height: 34.2857px;" data-mce-style="font-size: 24px; line-height: 34.2857px;"><strong>源码解析:</strong></span></p><p><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;"><strong>i1&gt;org.springframework.context.support.AbstractApplicationContext#refresh</strong></span></p><p><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;"><strong>&nbsp; &nbsp;i2&gt;org.springframework.context.support.AbstractApplicationContext#initApplicationEventMulticaster（初始化事件多播器）</strong></span></p><p><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;"><strong>&nbsp; &nbsp; &nbsp; &nbsp;i3&gt;org.springframework.context.support.AbstractApplicationContext#registerListeners（把事件监听器注册到多播器上去）</strong></span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><strong><span style="font-size: 14pt; line-height: 34.2857px;" data-mce-style="font-size: 14pt; line-height: 34.2857px;">i2(初始化事件多播器源码解析)</span></strong></span></p><pre id="leanote_ace_1558965071862_0" class="ace-tomorrow" draggable="false" data-mce-style="line-height: 1.5; font-size: 14px; height: 483px;">protected&nbsp;void&nbsp;initApplicationEventMulticaster()&nbsp;{
+		ConfigurableListableBeanFactory&nbsp;beanFactory&nbsp;=&nbsp;getBeanFactory();
+		/判断IOC容器中包含applicationEventMulticaster&nbsp;事件多播器的Bean的name
+		if&nbsp;(beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME))&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;/创建一个applicationEventMulticaster的bean放在IOC&nbsp;容器中,bean的name&nbsp;为applicationEventMulticaster
+			this.applicationEventMulticaster&nbsp;=beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME,&nbsp;ApplicationEventMulticaster.class);
+			if&nbsp;(logger.isDebugEnabled())&nbsp;{
+				logger.debug("Using&nbsp;ApplicationEventMulticaster&nbsp;["&nbsp;+&nbsp;this.applicationEventMulticaster&nbsp;+&nbsp;"]");
+			}
+		}
+		/容器中不包含一个beanName&nbsp;为applicationEventMulticaster的多播器组件
+		else&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//创建一个SimpleApplicationEventMulticaster&nbsp;多播器
+			this.applicationEventMulticaster&nbsp;=&nbsp;new&nbsp;SimpleApplicationEventMulticaster(beanFactory);
+			//注册到容器中
+			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME,&nbsp;this.applicationEventMulticaster);
+			if&nbsp;(logger.isDebugEnabled())&nbsp;{
+				logger.debug("Unable&nbsp;to&nbsp;locate&nbsp;ApplicationEventMulticaster&nbsp;with&nbsp;name&nbsp;'"&nbsp;+
+						APPLICATION_EVENT_MULTICASTER_BEAN_NAME&nbsp;+
+						"':&nbsp;using&nbsp;default&nbsp;["&nbsp;+&nbsp;this.applicationEventMulticaster&nbsp;+&nbsp;"]");
+			}
+		}
+	}​</pre><p><span style="font-size: 14pt; line-height: 34.2857px; color: #ff0000;" data-mce-style="font-size: 14pt; line-height: 34.2857px; color: #ff0000;"><strong>i3：把容器中的监听器注册到多播器上去 源码解析</strong></span></p><pre id="leanote_ace_1558965349935_0" class="ace-tomorrow" draggable="false" data-mce-style="line-height: 1.5; font-size: 14px; height: 1365px;">protected&nbsp;void&nbsp;registerListeners()&nbsp;{
+		//去容器中把applicationListener&nbsp;捞取出来注册到多播器上去（系统的）
+		for&nbsp;(ApplicationListener&lt;?&gt;&nbsp;listener&nbsp;:&nbsp;getApplicationListeners())&nbsp;{
+			getApplicationEventMulticaster().addApplicationListener(listener);
+		}
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//我们自己实现了ApplicationListener&nbsp;的组件
+		String[]&nbsp;listenerBeanNames&nbsp;=&nbsp;getBeanNamesForType(ApplicationListener.class,&nbsp;true,&nbsp;false);
+		for&nbsp;(String&nbsp;listenerBeanName&nbsp;:&nbsp;listenerBeanNames)&nbsp;{
+			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
+		}
+
+	&nbsp;&nbsp;&nbsp;&nbsp;//在这里之前，我们早期想发布的事件&nbsp;由于没有多播器没有发布，在这里我们总算有了自己的多播器，可以在这里发布早期堆积的事件了.
+		Set&lt;ApplicationEvent&gt;&nbsp;earlyEventsToProcess&nbsp;=&nbsp;this.earlyApplicationEvents;
+		this.earlyApplicationEvents&nbsp;=&nbsp;null;
+		if&nbsp;(earlyEventsToProcess&nbsp;!=&nbsp;null)&nbsp;{
+			for&nbsp;(ApplicationEvent&nbsp;earlyEvent&nbsp;:&nbsp;earlyEventsToProcess)&nbsp;{
+				getApplicationEventMulticaster().multicastEvent(earlyEvent);
+			}
+		}
+	}
+	
+	--------------------------------------------------------------------如何发布事件------------------------------------------------------
+	public&nbsp;void&nbsp;multicastEvent(final&nbsp;ApplicationEvent&nbsp;event,&nbsp;ResolvableType&nbsp;eventType)&nbsp;{
+		ResolvableType&nbsp;type&nbsp;=&nbsp;(eventType&nbsp;!=&nbsp;null&nbsp;?&nbsp;eventType&nbsp;:&nbsp;resolveDefaultEventType(event));
+		//获取到所有的监听器
+		for&nbsp;(final&nbsp;ApplicationListener&lt;?&gt;&nbsp;listener&nbsp;:&nbsp;getApplicationListeners(event,&nbsp;type))&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//看spring&nbsp;容器中是否支持线程池&nbsp;异步发送事件
+			Executor&nbsp;executor&nbsp;=&nbsp;getTaskExecutor();
+			if&nbsp;(executor&nbsp;!=&nbsp;null)&nbsp;{
+				executor.execute(new&nbsp;Runnable()&nbsp;{
+					@Override
+					public&nbsp;void&nbsp;run()&nbsp;{
+					&nbsp;&nbsp;&nbsp;&nbsp;
+						invokeListener(listener,&nbsp;event);
+					}
+				});
+			}
+			else&nbsp;{&nbsp;&nbsp;//同步发送事件
+				invokeListener(listener,&nbsp;event);
+			}
+		}
+	}	
+	
+	
+	private&nbsp;void&nbsp;doInvokeListener(ApplicationListener&nbsp;listener,&nbsp;ApplicationEvent&nbsp;event)&nbsp;{
+		try&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//调用对于listener的onApplicationEvent事件
+			listener.onApplicationEvent(event);
+		}
+		catch&nbsp;(ClassCastException&nbsp;ex)&nbsp;{
+			String&nbsp;msg&nbsp;=&nbsp;ex.getMessage();
+			if&nbsp;(msg&nbsp;==&nbsp;null&nbsp;||&nbsp;matchesClassCastMessage(msg,&nbsp;event.getClass()))&nbsp;{
+				//&nbsp;Possibly&nbsp;a&nbsp;lambda-defined&nbsp;listener&nbsp;which&nbsp;we&nbsp;could&nbsp;not&nbsp;resolve&nbsp;the&nbsp;generic&nbsp;event&nbsp;type&nbsp;for
+				//&nbsp;-&gt;&nbsp;let's&nbsp;suppress&nbsp;the&nbsp;exception&nbsp;and&nbsp;just&nbsp;log&nbsp;a&nbsp;debug&nbsp;message.
+				Log&nbsp;logger&nbsp;=&nbsp;LogFactory.getLog(getClass());
+				if&nbsp;(logger.isDebugEnabled())&nbsp;{
+					logger.debug("Non-matching&nbsp;event&nbsp;type&nbsp;for&nbsp;listener:&nbsp;"&nbsp;+&nbsp;listener,&nbsp;ex);
+				}
+			}
+			else&nbsp;{
+				throw&nbsp;ex;
+			}
+		}
+	}</pre><p>&nbsp;<br></p><p><span style="color: #ff0000; font-size: 18pt;" data-mce-style="color: #ff0000; font-size: 18pt;"><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;"><strong>二:<strong>BeanDefinitionRegistryPostProcessor​ 的处理源码流程</strong></strong></span></span></p><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong><strong><strong>执行时机:所有的bean定义信息将要被加载到容器中，Bean实例还没有被初始化。</strong></strong></strong></span></span></p><pre id="leanote_ace_1559035649719_0" class="ace-tomorrow" data-mce-style="line-height: 1.5; font-size: 14px; height: 336px;">@Component
+public&nbsp;class&nbsp;TulingBeanDefinationRegisterPostProcessor&nbsp;implements&nbsp;BeanDefinitionRegistryPostProcessor&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;@Override
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;postProcessBeanDefinitionRegistry(BeanDefinitionRegistry&nbsp;registry)&nbsp;throws&nbsp;BeansException&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("TulingBeanDefinationRegisterPostProcessor的postProcessBeanDefinitionRegistry方法");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("bean定义的数据量:"+registry.getBeanDefinitionCount());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RootBeanDefinition&nbsp;rootBeanDefinition&nbsp;=&nbsp;new&nbsp;RootBeanDefinition(TulingLog.class);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;registry.registerBeanDefinition("tulingLog",rootBeanDefinition);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;@Override
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;postProcessBeanFactory(ConfigurableListableBeanFactory&nbsp;beanFactory)&nbsp;throws&nbsp;BeansException&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("TulingBeanDefinationRegisterPostProcessor的postProcessBeanFactory方法");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(beanFactory.getBeanDefinitionCount());
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}﻿​</pre><p><span color="#ff0000" data-mce-style="color: #ff0000;" style="color: #ff0000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong>三:BeanFactoryPostProcessor 处理流程</strong></span></span></p><p><span color="#ff0000" data-mce-style="color: #ff0000;" style="color: #ff0000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong>执行时间:所有的Bean定义信息已经加载到容器中，但是Bean实例还没有被初始化.</strong></span></span></p><pre id="leanote_ace_1559035859816_0" class="brush:java ace-tomorrow">@Component
+public&nbsp;class&nbsp;TulingBeanFactoryPostProcessor&nbsp;implements&nbsp;BeanFactoryPostProcessor&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;@Override
+&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;void&nbsp;postProcessBeanFactory(ConfigurableListableBeanFactory&nbsp;beanFactory)&nbsp;throws&nbsp;BeansException&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println("IOC&nbsp;容器调用了TulingBeanFactoryPostProcessor的postProcessBeanFactory方法");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for(String&nbsp;name:beanFactory.getBeanDefinitionNames())&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if("tulingLog".equals(name))&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BeanDefinition&nbsp;beanDefinition&nbsp;=&nbsp;beanFactory.getBeanDefinition(name);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beanDefinition.setLazyInit(true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}</pre><p><span style="color: #ff0000;" data-mce-style="color: #ff0000;"><span style="font-size: 18.6667px; line-height: 34.2857px;" data-mce-style="font-size: 18.6667px; line-height: 34.2857px;"><strong><strong><strong>调用链:</strong></strong></strong></span></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;">i1:org.springframework.context.support.AbstractApplicationContext#refresh</span></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;">&gt;i2:org.springframework.context.support.AbstractApplicationContext#invokeBeanFactoryPostProcessors</span></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;">&nbsp; &nbsp;&gt;i3:org.springframework.context.support.PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors</span></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;">&nbsp; &nbsp; &nbsp;&gt;i4:org.springframework.context.support.PostProcessorRegistrationDelegate#invokeBeanDefinitionRegistryPostProcessors</span></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><span style="line-height: 34.2857px;" data-mce-style="line-height: 34.2857px;">&nbsp; &nbsp; &nbsp; &nbsp;&gt;i5:org.springframework.context.annotation.ConfigurationClassPostProcessor#processConfigBeanDefinitions</span></span></p><p><span style="font-size: 14pt; line-height: 34.2857px; color: rgb(255, 0, 0);" data-mce-style="font-size: 14pt; line-height: 34.2857px; color: #ff0000;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &gt; i6:org.springframework.context.annotation.ConfigurationClassParser#parse</span></p><p><span style="font-size: 14pt; line-height: 34.2857px; color: rgb(255, 0, 0);" data-mce-style="font-size: 14pt; line-height: 34.2857px; color: #ff0000;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&gt;i7:org.springframework.context.annotation.ConfigurationClassParser#processConfigurationClass</span></p><p><span style="font-size: 14pt; line-height: 34.2857px; color: rgb(255, 0, 0);" data-mce-style="font-size: 14pt; line-height: 34.2857px; color: #ff0000;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &gt;i8:org.springframework.context.annotation.ConfigurationClassParser#doProcessConfigurationClass</span></p><p>&nbsp;<br></p><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;"><strong><span style="line-height: 34.2857px; color: #ff0000;" data-mce-style="line-height: 34.2857px; color: #ff0000;">i4标记处源码解析org.springframework.context.support.PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors</span></strong></span></p><pre id="leanote_ace_1558966627677_0" class="ace-tomorrow" draggable="false" data-mce-style="line-height: 1.5; font-size: 14px; height: 3066px;">	public&nbsp;static&nbsp;void&nbsp;invokeBeanFactoryPostProcessors(
+			ConfigurableListableBeanFactory&nbsp;beanFactory,&nbsp;List&lt;BeanFactoryPostProcessor&gt;&nbsp;beanFactoryPostProcessors)&nbsp;{
+
+		//&nbsp;Invoke&nbsp;BeanDefinitionRegistryPostProcessors&nbsp;first,&nbsp;if&nbsp;any.
+		Set&lt;String&gt;&nbsp;processedBeans&nbsp;=&nbsp;new&nbsp;HashSet&lt;String&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//判断IOC&nbsp;容器是不是BeanDefinitionRegistry的？
+		if&nbsp;(beanFactory&nbsp;instanceof&nbsp;BeanDefinitionRegistry)&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//把IOC容器&nbsp;强制转为BeanDefinitionRegistry类型的
+			BeanDefinitionRegistry&nbsp;registry&nbsp;=&nbsp;(BeanDefinitionRegistry)&nbsp;beanFactory;
+			//创建一个普通的PostProcessors的list的组件
+			List&lt;BeanFactoryPostProcessor&gt;&nbsp;regularPostProcessors&nbsp;=&nbsp;new&nbsp;LinkedList&lt;BeanFactoryPostProcessor&gt;();
+			//创建一个BeanDefinitionRegistryPostProcessor类型的list
+			List&lt;BeanDefinitionRegistryPostProcessor&gt;&nbsp;registryProcessors&nbsp;=&nbsp;new&nbsp;LinkedList&lt;BeanDefinitionRegistryPostProcessor&gt;();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//处理容器硬编码(new&nbsp;出来的)带入的beanFacotryPostProcessors
+			for&nbsp;(BeanFactoryPostProcessor&nbsp;postProcessor&nbsp;:&nbsp;beanFactoryPostProcessors)&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//判断是不是BeanDefinitionRegistryPostProcessor
+				if&nbsp;(postProcessor&nbsp;instanceof&nbsp;BeanDefinitionRegistryPostProcessor)&nbsp;{
+				&nbsp;&nbsp;&nbsp;&nbsp;
+					BeanDefinitionRegistryPostProcessor&nbsp;registryProcessor&nbsp;=
+							(BeanDefinitionRegistryPostProcessor)&nbsp;postProcessor;
+					//调用BeanDefinitionRegistryPostProcessor的postProcessBeanDefinitionRegistry
+					registryProcessor.postProcessBeanDefinitionRegistry(registry);
+					//加入到list集合中
+					registryProcessors.add(registryProcessor);
+				}
+				else&nbsp;{//判断不是BeanDefinitionRegistryPostProcessor
+				&nbsp;&nbsp;&nbsp;&nbsp;//加入到集合中
+					regularPostProcessors.add(postProcessor);
+				}
+			}
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//创建一个当前注册的RegistryProcessors的集合
+			List&lt;BeanDefinitionRegistryPostProcessor&gt;&nbsp;currentRegistryProcessors&nbsp;=&nbsp;new&nbsp;ArrayList&lt;BeanDefinitionRegistryPostProcessor&gt;();
+
+			第一步:去容器中查询是否有BeanDefinitionRegistryPostProcessor类型的
+			String[]&nbsp;postProcessorNames&nbsp;=
+					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class,&nbsp;true,&nbsp;false);
+			for&nbsp;(String&nbsp;ppName&nbsp;:&nbsp;postProcessorNames)&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//判断是不是实现了PriorityOrdered接口的
+				if&nbsp;(beanFactory.isTypeMatch(ppName,&nbsp;PriorityOrdered.class))&nbsp;{
+				&nbsp;&nbsp;&nbsp;&nbsp;//添加到currentRegistryProcessors的集合中
+					currentRegistryProcessors.add(beanFactory.getBean(ppName,&nbsp;BeanDefinitionRegistryPostProcessor.class));
+					//添加到processedBeans的集合中
+					processedBeans.add(ppName);
+				}
+			}
+			//进行排序
+			sortPostProcessors(currentRegistryProcessors,&nbsp;beanFactory);
+			registryProcessors.addAll(currentRegistryProcessors);
+			//调用BeanDefinitionRegistryPostProcessors的postProcessBeanDefinitionRegistry方法
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors,&nbsp;registry);
+			currentRegistryProcessors.clear();
+
+			//&nbsp;Next,&nbsp;invoke&nbsp;the&nbsp;BeanDefinitionRegistryPostProcessors&nbsp;that&nbsp;implement&nbsp;Ordered.
+			第二步:去容器中查询是否有BeanDefinitionRegistryPostProcessor类型的
+			for&nbsp;(String&nbsp;ppName&nbsp;:&nbsp;postProcessorNames)&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//排除被处理过的，并且实现了Ordered接口的
+				if&nbsp;(!processedBeans.contains(ppName)&nbsp;&amp;&amp;&nbsp;beanFactory.isTypeMatch(ppName,&nbsp;Ordered.class))&nbsp;{
+					currentRegistryProcessors.add(beanFactory.getBean(ppName,&nbsp;BeanDefinitionRegistryPostProcessor.class));
+					//加到以处理的list中
+					processedBeans.add(ppName);
+				}
+			}
+			sortPostProcessors(currentRegistryProcessors,&nbsp;beanFactory);
+			registryProcessors.addAll(currentRegistryProcessors);
+			//调用BeanDefinitionRegistryPostProcessors的postProcessBeanDefinitionRegistry方法
+			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors,&nbsp;registry);
+			currentRegistryProcessors.clear();
+
+			//调用普通的BeanDefinitionRegistryPostProcessors没用实现&nbsp;PriorithOrdered和Ordered接口
+			boolean&nbsp;reiterate&nbsp;=&nbsp;true;
+			while&nbsp;(reiterate)&nbsp;{
+				reiterate&nbsp;=&nbsp;false;
+				postProcessorNames&nbsp;=&nbsp;beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class,&nbsp;true,&nbsp;false);
+				for&nbsp;(String&nbsp;ppName&nbsp;:&nbsp;postProcessorNames)&nbsp;{
+					if&nbsp;(!processedBeans.contains(ppName))&nbsp;{
+						currentRegistryProcessors.add(beanFactory.getBean(ppName,&nbsp;BeanDefinitionRegistryPostProcessor.class));
+						processedBeans.add(ppName);
+						reiterate&nbsp;=&nbsp;true;
+					}
+				}
+				sortPostProcessors(currentRegistryProcessors,&nbsp;beanFactory);
+				registryProcessors.addAll(currentRegistryProcessors);
+				invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors,&nbsp;registry);
+				currentRegistryProcessors.clear();
+			}
+
+			//调用上诉实现了也实现了BeanFactoryPostProcessors的接口
+			invokeBeanFactoryPostProcessors(registryProcessors,&nbsp;beanFactory);
+			invokeBeanFactoryPostProcessors(regularPostProcessors,&nbsp;beanFactory);
+		}
+
+		else&nbsp;{
+			//&nbsp;Invoke&nbsp;factory&nbsp;processors&nbsp;registered&nbsp;with&nbsp;the&nbsp;context&nbsp;instance.
+			invokeBeanFactoryPostProcessors(beanFactoryPostProcessors,&nbsp;beanFactory);
+		}
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//去IOC&nbsp;容器中获取BeanFactoryPostProcessor&nbsp;类型的
+		String[]&nbsp;postProcessorNames&nbsp;=
+				beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class,&nbsp;true,&nbsp;false);
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//分离实现了PriorityOrdered接口的&nbsp;Ordered&nbsp;接口的&nbsp;&nbsp;&nbsp;普通的
+		List&lt;BeanFactoryPostProcessor&gt;&nbsp;priorityOrderedPostProcessors&nbsp;=&nbsp;new&nbsp;ArrayList&lt;BeanFactoryPostProcessor&gt;();
+		List&lt;String&gt;&nbsp;orderedPostProcessorNames&nbsp;=&nbsp;new&nbsp;ArrayList&lt;String&gt;();
+		List&lt;String&gt;&nbsp;nonOrderedPostProcessorNames&nbsp;=&nbsp;new&nbsp;ArrayList&lt;String&gt;();
+		
+		for&nbsp;(String&nbsp;ppName&nbsp;:&nbsp;postProcessorNames)&nbsp;{
+			if&nbsp;(processedBeans.contains(ppName))&nbsp;{
+				//&nbsp;skip&nbsp;-&nbsp;already&nbsp;processed&nbsp;in&nbsp;first&nbsp;phase&nbsp;above
+			}
+			else&nbsp;if&nbsp;(beanFactory.isTypeMatch(ppName,&nbsp;PriorityOrdered.class))&nbsp;{
+				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName,&nbsp;BeanFactoryPostProcessor.class));
+			}
+			else&nbsp;if&nbsp;(beanFactory.isTypeMatch(ppName,&nbsp;Ordered.class))&nbsp;{
+				orderedPostProcessorNames.add(ppName);
+			}
+			else&nbsp;{
+				nonOrderedPostProcessorNames.add(ppName);
+			}
+		}
+
+		调用&nbsp;PriorityOrdered.
+		sortPostProcessors(priorityOrderedPostProcessors,&nbsp;beanFactory);
+		invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors,&nbsp;beanFactory);
+
+		//调用&nbsp;Ordered.
+		List&lt;BeanFactoryPostProcessor&gt;&nbsp;orderedPostProcessors&nbsp;=&nbsp;new&nbsp;ArrayList&lt;BeanFactoryPostProcessor&gt;();
+		for&nbsp;(String&nbsp;postProcessorName&nbsp;:&nbsp;orderedPostProcessorNames)&nbsp;{
+			orderedPostProcessors.add(beanFactory.getBean(postProcessorName,&nbsp;BeanFactoryPostProcessor.class));
+		}
+		sortPostProcessors(orderedPostProcessors,&nbsp;beanFactory);
+		invokeBeanFactoryPostProcessors(orderedPostProcessors,&nbsp;beanFactory);
+
+	&nbsp;&nbsp;&nbsp;&nbsp;//调用普通的
+		List&lt;BeanFactoryPostProcessor&gt;&nbsp;nonOrderedPostProcessors&nbsp;=&nbsp;new&nbsp;ArrayList&lt;BeanFactoryPostProcessor&gt;();
+		for&nbsp;(String&nbsp;postProcessorName&nbsp;:&nbsp;nonOrderedPostProcessorNames)&nbsp;{
+			nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName,&nbsp;BeanFactoryPostProcessor.class));
+		}
+		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors,&nbsp;beanFactory);
+
+		//&nbsp;Clear&nbsp;cached&nbsp;merged&nbsp;bean&nbsp;definitions&nbsp;since&nbsp;the&nbsp;post-processors&nbsp;might&nbsp;have
+		//&nbsp;modified&nbsp;the&nbsp;original&nbsp;metadata,&nbsp;e.g.&nbsp;replacing&nbsp;placeholders&nbsp;in&nbsp;values...
+		beanFactory.clearMetadataCache();
+	}</pre><p><span style="font-size: 18pt; color: rgb(255, 0, 0);" data-mce-style="font-size: 18pt; color: #ff0000;"><strong>&nbsp;源码解析: &nbsp;i5:org.springframework.context.annotation.ConfigurationClassPostProcessor#processConfigBeanDefinitions&nbsp;</strong></span></p><p>&nbsp;</p><pre id="leanote_ace_1559021040382_0" class="ace-tomorrow" draggable="false" data-mce-style="line-height: 1.5; font-size: 14px; height: 2625px;">	public&nbsp;void&nbsp;processConfigBeanDefinitions(BeanDefinitionRegistry&nbsp;registry)&nbsp;{
+		List&lt;BeanDefinitionHolder&gt;&nbsp;configCandidates&nbsp;=&nbsp;new&nbsp;ArrayList&lt;BeanDefinitionHolder&gt;();
+		//去IOC容器中的获取Bean定义的名称
+		//	private&nbsp;volatile&nbsp;List&lt;String&gt;&nbsp;beanDefinitionNames&nbsp;=&nbsp;new&nbsp;ArrayList&lt;String&gt;(256);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//没有解析之前，系统候选的bean定义配置(有自己的&nbsp;有系统自带的)
+		String[]&nbsp;candidateNames&nbsp;=&nbsp;registry.getBeanDefinitionNames();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//循环Bean定义的名称&nbsp;找出自己的传入的主配置类的bean定义信息&nbsp;&nbsp;configCandidates
+		for&nbsp;(String&nbsp;beanName&nbsp;:&nbsp;candidateNames)&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//去bean定义的map中获取对应的Bean定义对象
+		&nbsp;&nbsp;&nbsp;&nbsp;//	private&nbsp;final&nbsp;Map&lt;String,&nbsp;BeanDefinition&gt;&nbsp;beanDefinitionMap&nbsp;=&nbsp;new&nbsp;ConcurrentHashMap&lt;String,&nbsp;BeanDefinition&gt;(256);
+			BeanDefinition&nbsp;beanDef&nbsp;=&nbsp;registry.getBeanDefinition(beanName);
+			//检查该bean定义对象是不是用来描述配置类
+			if&nbsp;(ConfigurationClassUtils.isFullConfigurationClass(beanDef)&nbsp;||
+					ConfigurationClassUtils.isLiteConfigurationClass(beanDef))&nbsp;{
+				if&nbsp;(logger.isDebugEnabled())&nbsp;{
+					logger.debug("Bean&nbsp;definition&nbsp;has&nbsp;already&nbsp;been&nbsp;processed&nbsp;as&nbsp;a&nbsp;configuration&nbsp;class:&nbsp;"&nbsp;+&nbsp;beanDef);
+				}
+			}
+			else&nbsp;if&nbsp;(ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef,&nbsp;this.metadataReaderFactory))&nbsp;{
+				configCandidates.add(new&nbsp;BeanDefinitionHolder(beanDef,&nbsp;beanName));
+			}
+		}
+
+		//&nbsp;Return&nbsp;immediately&nbsp;if&nbsp;no&nbsp;@Configuration&nbsp;classes&nbsp;were&nbsp;found
+		if&nbsp;(configCandidates.isEmpty())&nbsp;{
+			return;
+		}
+
+		//检查配置类排序
+		Collections.sort(configCandidates,&nbsp;new&nbsp;Comparator&lt;BeanDefinitionHolder&gt;()&nbsp;{
+			@Override
+			public&nbsp;int&nbsp;compare(BeanDefinitionHolder&nbsp;bd1,&nbsp;BeanDefinitionHolder&nbsp;bd2)&nbsp;{
+				int&nbsp;i1&nbsp;=&nbsp;ConfigurationClassUtils.getOrder(bd1.getBeanDefinition());
+				int&nbsp;i2&nbsp;=&nbsp;ConfigurationClassUtils.getOrder(bd2.getBeanDefinition());
+				return&nbsp;(i1&nbsp;&lt;&nbsp;i2)&nbsp;?&nbsp;-1&nbsp;:&nbsp;(i1&nbsp;&gt;&nbsp;i2)&nbsp;?&nbsp;1&nbsp;:&nbsp;0;
+			}
+		});
+
+		//&nbsp;bean的名称生成策略
+		SingletonBeanRegistry&nbsp;sbr&nbsp;=&nbsp;null;
+		if&nbsp;(registry&nbsp;instanceof&nbsp;SingletonBeanRegistry)&nbsp;{
+			sbr&nbsp;=&nbsp;(SingletonBeanRegistry)&nbsp;registry;
+			if&nbsp;(!this.localBeanNameGeneratorSet&nbsp;&amp;&amp;&nbsp;sbr.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR))&nbsp;{
+				BeanNameGenerator&nbsp;generator&nbsp;=&nbsp;(BeanNameGenerator)&nbsp;sbr.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
+				this.componentScanBeanNameGenerator&nbsp;=&nbsp;generator;
+				this.importBeanNameGenerator&nbsp;=&nbsp;generator;
+			}
+		}
+
+		/***创建一个配置类解析器
+		1)元数据读取器工厂
+		this.metadataReaderFactory&nbsp;=&nbsp;metadataReaderFactory;
+		2)问题报告器
+		this.problemReporter&nbsp;=&nbsp;problemReporter;
+		//设置环境
+		this.environment&nbsp;=&nbsp;environment;
+		3)资源加载器
+		this.resourceLoader&nbsp;=&nbsp;resourceLoader;
+		4）创建了一个组件扫描器
+		this.componentScanParser&nbsp;=&nbsp;new&nbsp;ComponentScanAnnotationParser(
+				environment,&nbsp;resourceLoader,&nbsp;componentScanBeanNameGenerator,&nbsp;registry);
+		this.conditionEvaluator&nbsp;=&nbsp;new&nbsp;ConditionEvaluator(registry,&nbsp;environment,&nbsp;resourceLoader);
+		****/
+		
+		ConfigurationClassParser&nbsp;parser&nbsp;=&nbsp;new&nbsp;ConfigurationClassParser(
+				this.metadataReaderFactory,&nbsp;this.problemReporter,&nbsp;this.environment,
+				this.resourceLoader,&nbsp;this.componentScanBeanNameGenerator,&nbsp;registry);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//将要被解析的配置类(把自己的configCandidates加入到&nbsp;候选的)
+		Set&lt;BeanDefinitionHolder&gt;&nbsp;candidates&nbsp;=&nbsp;new&nbsp;LinkedHashSet&lt;BeanDefinitionHolder&gt;(configCandidates);
+		//已经被解析的配置类(由于do&nbsp;while&nbsp;那么mainclass就一定会被解析,被解析的size为1)
+		Set&lt;ConfigurationClass&gt;&nbsp;alreadyParsed&nbsp;=&nbsp;new&nbsp;HashSet&lt;ConfigurationClass&gt;(configCandidates.size());
+		do&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//通过配置解析器真正的解析配置类
+			parser.parse(candidates);
+			
+			//进行校验
+			parser.validate();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//获取ConfigClass&nbsp;(把解析过的配置bean定义信息获取出来)
+			Set&lt;ConfigurationClass&gt;&nbsp;configClasses&nbsp;=&nbsp;new&nbsp;LinkedHashSet&lt;ConfigurationClass&gt;(parser.getConfigurationClasses());
+			configClasses.removeAll(alreadyParsed);
+
+			//&nbsp;Read&nbsp;the&nbsp;model&nbsp;and&nbsp;create&nbsp;bean&nbsp;definitions&nbsp;based&nbsp;on&nbsp;its&nbsp;content
+			if&nbsp;(this.reader&nbsp;==&nbsp;null)&nbsp;{
+				this.reader&nbsp;=&nbsp;new&nbsp;ConfigurationClassBeanDefinitionReader(
+						registry,&nbsp;this.sourceExtractor,&nbsp;this.resourceLoader,&nbsp;this.environment,
+						this.importBeanNameGenerator,&nbsp;parser.getImportRegistry());
+			}
+			
+			//@CompentScan是直接注册Bean定义信息的&nbsp;&nbsp;&nbsp;&nbsp;但是通过获取@Import,@Bean这种的注解还没有注册的bean定义,
+			this.reader.loadBeanDefinitions(configClasses);
+			//把系统解析过我们自己的组件放在alreadyParsed
+			alreadyParsed.addAll(configClasses);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//清除解析过的&nbsp;配置文件&nbsp;
+			candidates.clear();
+			
+			//已经注册的bean定义个数大于最新&nbsp;开始系统+主配置类的(发生过解析)
+			if&nbsp;(registry.getBeanDefinitionCount()&nbsp;&gt;&nbsp;candidateNames.length)&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//获取系统+自己解析的+mainconfig的bean定义信息
+				String[]&nbsp;newCandidateNames&nbsp;=&nbsp;registry.getBeanDefinitionNames();
+				//系统的+mainconfig的bean定义信息
+				Set&lt;String&gt;&nbsp;oldCandidateNames&nbsp;=&nbsp;new&nbsp;HashSet&lt;String&gt;(Arrays.asList(candidateNames));
+				
+				//已经解析过的自己的组件
+				Set&lt;String&gt;&nbsp;alreadyParsedClasses&nbsp;=&nbsp;new&nbsp;HashSet&lt;String&gt;();
+				for&nbsp;(ConfigurationClass&nbsp;configurationClass&nbsp;:&nbsp;alreadyParsed)&nbsp;{
+					alreadyParsedClasses.add(configurationClass.getMetadata().getClassName());
+				}
+				
+				for&nbsp;(String&nbsp;candidateName&nbsp;:&nbsp;newCandidateNames)&nbsp;{
+				&nbsp;&nbsp;&nbsp;&nbsp;//老的（系统+mainconfig）&nbsp;不包含解析的
+					if&nbsp;(!oldCandidateNames.contains(candidateName))&nbsp;{
+					&nbsp;&nbsp;&nbsp;&nbsp;//把当前bean定义获取出来
+						BeanDefinition&nbsp;bd&nbsp;=&nbsp;registry.getBeanDefinition(candidateName);
+						//检查是否为解析过的
+						if&nbsp;(ConfigurationClassUtils.checkConfigurationClassCandidate(bd,&nbsp;this.metadataReaderFactory)&nbsp;&amp;&amp;
+								!alreadyParsedClasses.contains(bd.getBeanClassName()))&nbsp;{
+							//若不是解析过且通过检查的&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;把当前的bean定义&nbsp;加入到candidates中	&nbsp;&nbsp;&nbsp;&nbsp;
+							candidates.add(new&nbsp;BeanDefinitionHolder(bd,&nbsp;candidateName));
+						}
+					}
+				}
+				把解析过的赋值给原来的&nbsp;
+				candidateNames&nbsp;=&nbsp;newCandidateNames;
+			}
+		}
+		while&nbsp;(!candidates.isEmpty());&nbsp;&nbsp;//还存主没有解析过的&nbsp;&nbsp;再次解析
+
+		//&nbsp;Register&nbsp;the&nbsp;ImportRegistry&nbsp;as&nbsp;a&nbsp;bean&nbsp;in&nbsp;order&nbsp;to&nbsp;support&nbsp;ImportAware&nbsp;@Configuration&nbsp;classes
+		if&nbsp;(sbr&nbsp;!=&nbsp;null)&nbsp;{
+			if&nbsp;(!sbr.containsSingleton(IMPORT_REGISTRY_BEAN_NAME))&nbsp;{
+				sbr.registerSingleton(IMPORT_REGISTRY_BEAN_NAME,&nbsp;parser.getImportRegistry());
+			}
+		}
+
+		if&nbsp;(this.metadataReaderFactory&nbsp;instanceof&nbsp;CachingMetadataReaderFactory)&nbsp;{
+			((CachingMetadataReaderFactory)&nbsp;this.metadataReaderFactory).clearCache();
+		}
+	}​</pre><p><span style="font-size: 18pt;" data-mce-style="font-size: 18pt;"><strong><span style="color: #ff0000;" data-mce-style="color: #ff0000;">&nbsp;i6源码解析 :org.springframework.context.annotation.ConfigurationClassParser#parse</span></strong></span><br></p><p>&nbsp;</p><pre id="leanote_ace_1559022091861_0" class="ace-tomorrow" draggable="false" data-mce-style="line-height: 1.5; font-size: 14px; height: 8547px;">public&nbsp;void&nbsp;parse(Set&lt;BeanDefinitionHolder&gt;&nbsp;configCandidates)&nbsp;{
+		this.deferredImportSelectors&nbsp;=&nbsp;new&nbsp;LinkedList&lt;DeferredImportSelectorHolder&gt;();
+
+		for&nbsp;(BeanDefinitionHolder&nbsp;holder&nbsp;:&nbsp;configCandidates)&nbsp;{
+			BeanDefinition&nbsp;bd&nbsp;=&nbsp;holder.getBeanDefinition();
+			try&nbsp;{
+			&nbsp;&nbsp;&nbsp;&nbsp;//注解形式的bean定义信息
+				if&nbsp;(bd&nbsp;instanceof&nbsp;AnnotatedBeanDefinition)&nbsp;{
+				&nbsp;&nbsp;&nbsp;&nbsp;//解析配置类的bean定义
+					parse(((AnnotatedBeanDefinition)&nbsp;bd).getMetadata(),&nbsp;holder.getBeanName());
+				}
+				else&nbsp;if&nbsp;(bd&nbsp;instanceof&nbsp;AbstractBeanDefinition&nbsp;&amp;&amp;&nbsp;((AbstractBeanDefinition)&nbsp;bd).hasBeanClass())&nbsp;{
+					parse(((AbstractBeanDefinition)&nbsp;bd).getBeanClass(),&nbsp;holder.getBeanName());
+				}
+				else&nbsp;{
+					parse(bd.getBeanClassName(),&nbsp;holder.getBeanName());
+				}
+			}
+			catch&nbsp;(BeanDefinitionStoreException&nbsp;ex)&nbsp;{
+				throw&nbsp;ex;
+			}
+			catch&nbsp;(Throwable&nbsp;ex)&nbsp;{
+				throw&nbsp;new&nbsp;BeanDefinitionStoreException(
+						"Failed&nbsp;to&nbsp;parse&nbsp;configuration&nbsp;class&nbsp;["&nbsp;+&nbsp;bd.getBeanClassName()&nbsp;+&nbsp;"]",&nbsp;ex);
+			}
+		}
+
+		processDeferredImportSelectors();
+	}​
+	
+	
+org.springframework.context.annotation.ConfigurationClassParser#parse
+	org.springframework.context.annotation.ConfigurationClassParser#processConfigurationClass
+
+protected&nbsp;void&nbsp;processConfigurationClass(ConfigurationClass&nbsp;configClass)&nbsp;throws&nbsp;IOException&nbsp;{
+		if&nbsp;(this.conditionEvaluator.shouldSkip(configClass.getMetadata(),&nbsp;ConfigurationPhase.PARSE_CONFIGURATION))&nbsp;{
+			return;
+		}
+
+		ConfigurationClass&nbsp;existingClass&nbsp;=&nbsp;this.configurationClasses.get(configClass);
+		if&nbsp;(existingClass&nbsp;!=&nbsp;null)&nbsp;{
+			if&nbsp;(configClass.isImported())&nbsp;{
+				if&nbsp;(existingClass.isImported())&nbsp;{
+					existingClass.mergeImportedBy(configClass);
+				}
+				//&nbsp;Otherwise&nbsp;ignore&nbsp;new&nbsp;imported&nbsp;config&nbsp;class;&nbsp;existing&nbsp;non-imported&nbsp;class&nbsp;overrides&nbsp;it.
+				return;
+			}
+			else&nbsp;{
+				//&nbsp;Explicit&nbsp;bean&nbsp;definition&nbsp;found,&nbsp;probably&nbsp;replacing&nbsp;an&nbsp;import.
+				//&nbsp;Let's&nbsp;remove&nbsp;the&nbsp;old&nbsp;one&nbsp;and&nbsp;go&nbsp;with&nbsp;the&nbsp;new&nbsp;one.
+				this.configurationClasses.remove(configClass);
+				for&nbsp;(Iterator&lt;ConfigurationClass&gt;&nbsp;it&nbsp;=&nbsp;this.knownSuperclasses.values().iterator();&nbsp;it.hasNext();)&nbsp;{
+					if&nbsp;(configClass.equals(it.next()))&nbsp;{
+						it.remove();
+					}
+				}
+			}
+		}
+
+		递归处理配置类及其超类层次结构。
+		SourceClass&nbsp;sourceClass&nbsp;=&nbsp;asSourceClass(configClass);
+		do&nbsp;{
+			sourceClass&nbsp;=&nbsp;doProcessConfigurationClass(configClass,&nbsp;sourceClass);
+		}
+		while&nbsp;(sourceClass&nbsp;!=&nbsp;null);
+
+		this.configurationClasses.put(configClass,&nbsp;configClass);
+	}
+	
+	
+org.springframework.context.annotation.ConfigurationClassParser#doProcessConfigurationClass
+	protected&nbsp;final&nbsp;SourceClass&nbsp;doProcessConfigurationClass(ConfigurationClass&nbsp;configClass,&nbsp;SourceClass&nbsp;sourceClass)
+			throws&nbsp;IOException&nbsp;{
+
+		//&nbsp;Recursively&nbsp;process&nbsp;any&nbsp;member&nbsp;(nested)&nbsp;classes&nbsp;first
+		processMemberClasses(configClass,&nbsp;sourceClass);
+
+		//处理@PropertySource注解
+		for&nbsp;(AnnotationAttributes&nbsp;propertySource&nbsp;:&nbsp;AnnotationConfigUtils.attributesForRepeatable(
+				sourceClass.getMetadata(),&nbsp;PropertySources.class,
+				org.springframework.context.annotation.PropertySource.class))&nbsp;{
+			if&nbsp;(this.environment&nbsp;instanceof&nbsp;ConfigurableEnvironment)&nbsp;{
+				processPropertySource(propertySource);
+			}
+			else&nbsp;{
+				logger.warn("Ignoring&nbsp;@PropertySource&nbsp;annotation&nbsp;on&nbsp;["&nbsp;+&nbsp;sourceClass.getMetadata().getClassName()&nbsp;+
+						"].&nbsp;Reason:&nbsp;Environment&nbsp;must&nbsp;implement&nbsp;ConfigurableEnvironment");
+			}
+		}
+
+		//处理@ComponentScan注解
+		
+		//解析@ComponentScans注解的属性&nbsp;封装成一个一个的componentscan对象
+		Set&lt;AnnotationAttributes&gt;&nbsp;componentScans&nbsp;=&nbsp;AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(),&nbsp;ComponentScans.class,&nbsp;ComponentScan.class);
+		if&nbsp;(!componentScans.isEmpty()&nbsp;&amp;&amp;!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(),&nbsp;ConfigurationPhase.REGISTER_BEAN))&nbsp;{
+			
+			//循环componentScans的set
+			for&nbsp;(AnnotationAttributes&nbsp;componentScan&nbsp;:&nbsp;componentScans)&nbsp;{
+				//&nbsp;立即执行扫描解析
+				Set&lt;BeanDefinitionHolder&gt;&nbsp;scannedBeanDefinitions&nbsp;=this.componentScanParser.parse(componentScan,&nbsp;sourceClass.getMetadata().getClassName());
+				//检查任何其他配置类的扫描定义集，并在需要时递归解析
+				for&nbsp;(BeanDefinitionHolder&nbsp;holder&nbsp;:&nbsp;scannedBeanDefinitions)&nbsp;{
+				&nbsp;&nbsp;&nbsp;&nbsp;//获取原始的bean定义信息
+					BeanDefinition&nbsp;bdCand&nbsp;=&nbsp;holder.getBeanDefinition().getOriginatingBeanDefinition();
+					if&nbsp;(bdCand&nbsp;==&nbsp;null)&nbsp;{
+						bdCand&nbsp;=&nbsp;holder.getBeanDefinition();
+					}
+					//检查当前的bean定义信息是不是配置类&nbsp;&nbsp;比如MainConfig的bean定义信息
+					if&nbsp;(ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand,&nbsp;this.metadataReaderFactory))&nbsp;{
+					&nbsp;&nbsp;&nbsp;&nbsp;//递归调用来解析MainConfig,解析出来配置类的中导入的bean定义信息
+						parse(bdCand.getBeanClassName(),&nbsp;holder.getBeanName());
+					}
+				}
+			}
+		}
+
+		//处理@Import注解&nbsp;&nbsp;&nbsp;解析Import&nbsp;注解的ImportSelector&nbsp;&nbsp;ImportBeanDefinitionRegister,@Bean这种
+		//存放在ConfigClass中
+		processImports(configClass,&nbsp;sourceClass,&nbsp;getImports(sourceClass),&nbsp;true);
+
+		//处理&nbsp;@ImportResource&nbsp;annotations
+		if&nbsp;(sourceClass.getMetadata().isAnnotated(ImportResource.class.getName()))&nbsp;{
+			AnnotationAttributes&nbsp;importResource&nbsp;=
+					AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),&nbsp;ImportResource.class);
+			String[]&nbsp;resources&nbsp;=&nbsp;importResource.getStringArray("locations");
+			Class&lt;?&nbsp;extends&nbsp;BeanDefinitionReader&gt;&nbsp;readerClass&nbsp;=&nbsp;importResource.getClass("reader");
+			for&nbsp;(String&nbsp;resource&nbsp;:&nbsp;resources)&nbsp;{
+				String&nbsp;resolvedResource&nbsp;=&nbsp;this.environment.resolveRequiredPlaceholders(resource);
+				configClass.addImportedResource(resolvedResource,&nbsp;readerClass);
+			}
+		}
+
+		//&nbsp;处理&nbsp;&nbsp;@Bean&nbsp;methods
+		Set&lt;MethodMetadata&gt;&nbsp;beanMethods&nbsp;=&nbsp;retrieveBeanMethodMetadata(sourceClass);
+		for&nbsp;(MethodMetadata&nbsp;methodMetadata&nbsp;:&nbsp;beanMethods)&nbsp;{
+			configClass.addBeanMethod(new&nbsp;BeanMethod(methodMetadata,&nbsp;configClass));
+		}
+
+		//处理接口
+		processInterfaces(configClass,&nbsp;sourceClass);
+
+		//&nbsp;处理超类的
+		if&nbsp;(sourceClass.getMetadata().hasSuperClass())&nbsp;{
+			String&nbsp;superclass&nbsp;=&nbsp;sourceClass.getMetadata().getSuperClassName();
+			if&nbsp;(!superclass.startsWith("java")&nbsp;&amp;&amp;&nbsp;!this.knownSuperclasses.containsKey(superclass))&nbsp;{
+				this.knownSuperclasses.put(superclass,&nbsp;configClass);
+				//&nbsp;Superclass&nbsp;found,&nbsp;return&nbsp;its&nbsp;annotation&nbsp;metadata&nbsp;and&nbsp;recurse
+				return&nbsp;sourceClass.getSuperClass();
+			}
+		}
+
+		//&nbsp;No&nbsp;superclass&nbsp;-&gt;&nbsp;processing&nbsp;is&nbsp;complete
+		return&nbsp;null;
+	}
+	
+//通过组件扫描器进行真正的解析	
+org.springframework.context.annotation.ComponentScanAnnotationParser#parse
+Set&lt;BeanDefinitionHolder&gt;
+
+	public&nbsp;Set&lt;BeanDefinitionHolder&gt;&nbsp;parse(AnnotationAttributes&nbsp;componentScan,&nbsp;final&nbsp;String&nbsp;declaringClass)&nbsp;{
+		Assert.state(this.environment&nbsp;!=&nbsp;null,&nbsp;"Environment&nbsp;must&nbsp;not&nbsp;be&nbsp;null");
+		Assert.state(this.resourceLoader&nbsp;!=&nbsp;null,&nbsp;"ResourceLoader&nbsp;must&nbsp;not&nbsp;be&nbsp;null");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//创建一个类路径下的bean定义扫描器
+		ClassPathBeanDefinitionScanner&nbsp;scanner&nbsp;=&nbsp;new&nbsp;ClassPathBeanDefinitionScanner(this.registry,
+				componentScan.getBoolean("useDefaultFilters"),&nbsp;this.environment,&nbsp;this.resourceLoader);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//为扫描器设置一个bean&nbsp;名称的生成器
+		Class&lt;?&nbsp;extends&nbsp;BeanNameGenerator&gt;&nbsp;generatorClass&nbsp;=&nbsp;componentScan.getClass("nameGenerator");
+		boolean&nbsp;useInheritedGenerator&nbsp;=&nbsp;(BeanNameGenerator.class&nbsp;==&nbsp;generatorClass);
+		scanner.setBeanNameGenerator(useInheritedGenerator&nbsp;?&nbsp;this.beanNameGenerator&nbsp;:
+				BeanUtils.instantiateClass(generatorClass));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		ScopedProxyMode&nbsp;scopedProxyMode&nbsp;=&nbsp;componentScan.getEnum("scopedProxy");
+		if&nbsp;(scopedProxyMode&nbsp;!=&nbsp;ScopedProxyMode.DEFAULT)&nbsp;{
+			scanner.setScopedProxyMode(scopedProxyMode);
+		}
+		else&nbsp;{
+			Class&lt;?&nbsp;extends&nbsp;ScopeMetadataResolver&gt;&nbsp;resolverClass&nbsp;=&nbsp;componentScan.getClass("scopeResolver");
+			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
+		}
+
+		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
+
+		for&nbsp;(AnnotationAttributes&nbsp;filter&nbsp;:&nbsp;componentScan.getAnnotationArray("includeFilters"))&nbsp;{
+			for&nbsp;(TypeFilter&nbsp;typeFilter&nbsp;:&nbsp;typeFiltersFor(filter))&nbsp;{
+				scanner.addIncludeFilter(typeFilter);
+			}
+		}
+		for&nbsp;(AnnotationAttributes&nbsp;filter&nbsp;:&nbsp;componentScan.getAnnotationArray("excludeFilters"))&nbsp;{
+			for&nbsp;(TypeFilter&nbsp;typeFilter&nbsp;:&nbsp;typeFiltersFor(filter))&nbsp;{
+				scanner.addExcludeFilter(typeFilter);
+			}
+		}
+
+		boolean&nbsp;lazyInit&nbsp;=&nbsp;componentScan.getBoolean("lazyInit");
+		if&nbsp;(lazyInit)&nbsp;{
+			scanner.getBeanDefinitionDefaults().setLazyInit(true);
+		}
+
+		Set&lt;String&gt;&nbsp;basePackages&nbsp;=&nbsp;new&nbsp;LinkedHashSet&lt;String&gt;();
+		String[]&nbsp;basePackagesArray&nbsp;=&nbsp;componentScan.getStringArray("basePackages");
+		for&nbsp;(String&nbsp;pkg&nbsp;:&nbsp;basePackagesArray)&nbsp;{
+			String[]&nbsp;tokenized&nbsp;=&nbsp;StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
+					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+			basePackages.addAll(Arrays.asList(tokenized));
+		}
+		for&nbsp;(Class&lt;?&gt;&nbsp;clazz&nbsp;:&nbsp;componentScan.getClassArray("basePackageClasses"))&nbsp;{
+			basePackages.add(ClassUtils.getPackageName(clazz));
+		}
+		if&nbsp;(basePackages.isEmpty())&nbsp;{
+			basePackages.add(ClassUtils.getPackageName(declaringClass));
+		}
+
+		scanner.addExcludeFilter(new&nbsp;AbstractTypeHierarchyTraversingFilter(false,&nbsp;false)&nbsp;{
+			@Override
+			protected&nbsp;boolean&nbsp;matchClassName(String&nbsp;className)&nbsp;{
+				return&nbsp;declaringClass.equals(className);
+			}
+		});
+		//真正扫描器扫描指定路径
+		return&nbsp;scanner.doScan(StringUtils.toStringArray(basePackages));
+	}
+
+
+//创建类路径下的bean定义扫描器
+public&nbsp;ClassPathBeanDefinitionScanner(BeanDefinitionRegistry&nbsp;registry,&nbsp;boolean&nbsp;useDefaultFilters,
+			Environment&nbsp;environment,&nbsp;ResourceLoader&nbsp;resourceLoader)&nbsp;{
+
+		Assert.notNull(registry,&nbsp;"BeanDefinitionRegistry&nbsp;must&nbsp;not&nbsp;be&nbsp;null");
+		this.registry&nbsp;=&nbsp;registry;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//使用默认的扫描规则
+		if&nbsp;(useDefaultFilters)&nbsp;{
+			registerDefaultFilters();
+		}
+		//设置环境变量
+		setEnvironment(environment);
+		//设置资源加载器
+		setResourceLoader(resourceLoader);
+	}
+	
+	//默认的扫描规则
+	protected&nbsp;void&nbsp;registerDefaultFilters()&nbsp;{
+	&nbsp;&nbsp;&nbsp;&nbsp;//添加了Componet的解析，这就是我们为啥@Componet&nbsp;@Respository&nbsp;@Service&nbsp;@Controller的&nbsp;&nbsp;@AspectJ
+		this.includeFilters.add(new&nbsp;AnnotationTypeFilter(Component.class));
+		ClassLoader&nbsp;cl&nbsp;=&nbsp;ClassPathScanningCandidateComponentProvider.class.getClassLoader();
+		try&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//添加Jsr&nbsp;250规范的注解
+			this.includeFilters.add(new&nbsp;AnnotationTypeFilter(
+					((Class&lt;?&nbsp;extends&nbsp;Annotation&gt;)&nbsp;ClassUtils.forName("javax.annotation.ManagedBean",&nbsp;cl)),&nbsp;false));
+			logger.debug("JSR-250&nbsp;'javax.annotation.ManagedBean'&nbsp;found&nbsp;and&nbsp;supported&nbsp;for&nbsp;component&nbsp;scanning");
+		}
+		catch&nbsp;(ClassNotFoundException&nbsp;ex)&nbsp;{
+			//&nbsp;JSR-250&nbsp;1.1&nbsp;API&nbsp;(as&nbsp;included&nbsp;in&nbsp;Java&nbsp;EE&nbsp;6)&nbsp;not&nbsp;available&nbsp;-&nbsp;simply&nbsp;skip.
+		}
+		try&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//JSR330的注解
+			this.includeFilters.add(new&nbsp;AnnotationTypeFilter(
+					((Class&lt;?&nbsp;extends&nbsp;Annotation&gt;)&nbsp;ClassUtils.forName("javax.inject.Named",&nbsp;cl)),&nbsp;false));
+			logger.debug("JSR-330&nbsp;'javax.inject.Named'&nbsp;annotation&nbsp;found&nbsp;and&nbsp;supported&nbsp;for&nbsp;component&nbsp;scanning");
+		}
+		catch&nbsp;(ClassNotFoundException&nbsp;ex)&nbsp;{
+			//&nbsp;JSR-330&nbsp;API&nbsp;not&nbsp;available&nbsp;-&nbsp;simply&nbsp;skip.
+		}
+	}
+	
+	使用扫描器去真正的扫描类,返回Set&lt;BeanDefinitionHolder&gt;
+	org.springframework.context.annotation.ClassPathBeanDefinitionScanner#doScan
+	
+	protected&nbsp;Set&lt;BeanDefinitionHolder&gt;&nbsp;doScan(String...&nbsp;basePackages)&nbsp;{
+		Assert.notEmpty(basePackages,&nbsp;"At&nbsp;least&nbsp;one&nbsp;base&nbsp;package&nbsp;must&nbsp;be&nbsp;specified");
+		//创建一个Bean定义&nbsp;holder的&nbsp;set
+		Set&lt;BeanDefinitionHolder&gt;&nbsp;beanDefinitions&nbsp;=&nbsp;new&nbsp;LinkedHashSet&lt;BeanDefinitionHolder&gt;();
+		//循环扫描路径
+		for&nbsp;(String&nbsp;basePackage&nbsp;:&nbsp;basePackages)&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//找到候选的组件集合
+			Set&lt;BeanDefinition&gt;&nbsp;candidates&nbsp;=&nbsp;findCandidateComponents(basePackage);
+			//循环候选组件集合
+			for&nbsp;(BeanDefinition&nbsp;candidate&nbsp;:&nbsp;candidates)&nbsp;{
+				ScopeMetadata&nbsp;scopeMetadata&nbsp;=&nbsp;this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				candidate.setScope(scopeMetadata.getScopeName());
+				//生成bean的名称
+				String&nbsp;beanName&nbsp;=&nbsp;this.beanNameGenerator.generateBeanName(candidate,&nbsp;this.registry);
+				//判断是不是抽象的beand定义
+				if&nbsp;(candidate&nbsp;instanceof&nbsp;AbstractBeanDefinition)&nbsp;{
+					postProcessBeanDefinition((AbstractBeanDefinition)&nbsp;candidate,&nbsp;beanName);
+				}
+				//注解的bean定义西悉尼
+				if&nbsp;(candidate&nbsp;instanceof&nbsp;AnnotatedBeanDefinition)&nbsp;{
+					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition)&nbsp;candidate);
+				}
+				
+				if&nbsp;(checkCandidate(beanName,&nbsp;candidate))&nbsp;{&nbsp;//检查当前的和存主的bean定义是否有冲突
+				&nbsp;&nbsp;&nbsp;&nbsp;//把候选的组件封装成BeanDefinitionHolder
+					BeanDefinitionHolder&nbsp;definitionHolder&nbsp;=&nbsp;new&nbsp;BeanDefinitionHolder(candidate,&nbsp;beanName);
+					definitionHolder&nbsp;=AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata,&nbsp;definitionHolder,&nbsp;this.registry);
+					//加入到bean定义的集合中
+					beanDefinitions.add(definitionHolder);
+					//注册当前的bean定义信息
+					registerBeanDefinition(definitionHolder,&nbsp;this.registry);
+				}
+			}
+		}
+		return&nbsp;beanDefinitions;
+	}
+
+&nbsp;&nbsp;&nbsp;&nbsp;
+org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#findCandidateComponents&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;找到候选的组件&nbsp;返回Set&lt;BeanDefinition&gt;的集合
+	
+	public&nbsp;Set&lt;BeanDefinition&gt;&nbsp;findCandidateComponents(String&nbsp;basePackage)&nbsp;{
+		//候选的bean定义信息
+		Set&lt;BeanDefinition&gt;&nbsp;candidates&nbsp;=&nbsp;new&nbsp;LinkedHashSet&lt;BeanDefinition&gt;();
+		try&nbsp;{
+		&nbsp;&nbsp;&nbsp;&nbsp;//拼接需要扫描包下面的类的路径&nbsp;&nbsp;&nbsp;classpath*:com/tuling/testapplicationlistener/**/*.class
+			String&nbsp;packageSearchPath&nbsp;=&nbsp;ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX&nbsp;+
+					resolveBasePackage(basePackage)&nbsp;+&nbsp;'/'&nbsp;+&nbsp;this.resourcePattern;
+			//把路径解析成一个个.class文件		
+			Resource[]&nbsp;resources&nbsp;=&nbsp;this.resourcePatternResolver.getResources(packageSearchPath);
+			boolean&nbsp;traceEnabled&nbsp;=&nbsp;logger.isTraceEnabled();
+			boolean&nbsp;debugEnabled&nbsp;=&nbsp;logger.isDebugEnabled();
+			
+			//循环.class文件的resource对象
+			for&nbsp;(Resource&nbsp;resource&nbsp;:&nbsp;resources)&nbsp;{
+				if&nbsp;(traceEnabled)&nbsp;{
+					logger.trace("Scanning&nbsp;"&nbsp;+&nbsp;resource);
+				}
+				//判断class文件是否可读
+				if&nbsp;(resource.isReadable())&nbsp;{
+					try&nbsp;{
+					&nbsp;&nbsp;&nbsp;&nbsp;//把resource对象&nbsp;变为一个类的原信息读取器
+						MetadataReader&nbsp;metadataReader&nbsp;=&nbsp;this.metadataReaderFactory.getMetadataReader(resource);
+						//判断类的源信息读取器是否为候选的组件
+						if&nbsp;(isCandidateComponent(metadataReader))&nbsp;{&nbsp;&nbsp;//是候选的组件
+						&nbsp;&nbsp;&nbsp;&nbsp;//把类元信息读取器封装成一个ScannedGenericBeanDefinition
+							ScannedGenericBeanDefinition&nbsp;sbd&nbsp;=&nbsp;new&nbsp;ScannedGenericBeanDefinition(metadataReader);
+							sbd.setResource(resource);
+							sbd.setSource(resource);
+							//是候选的组件
+							if&nbsp;(isCandidateComponent(sbd))&nbsp;{
+								if&nbsp;(debugEnabled)&nbsp;{
+									logger.debug("Identified&nbsp;candidate&nbsp;component&nbsp;class:&nbsp;"&nbsp;+&nbsp;resource);
+								}
+								//把当前解析出来的定义的加入到&nbsp;BeanDefinition的集合中
+								candidates.add(sbd);
+							}
+							else&nbsp;{
+								if&nbsp;(debugEnabled)&nbsp;{
+									logger.debug("Ignored&nbsp;because&nbsp;not&nbsp;a&nbsp;concrete&nbsp;top-level&nbsp;class:&nbsp;"&nbsp;+&nbsp;resource);
+								}
+							}
+						}
+						else&nbsp;{
+							if&nbsp;(traceEnabled)&nbsp;{
+								logger.trace("Ignored&nbsp;because&nbsp;not&nbsp;matching&nbsp;any&nbsp;filter:&nbsp;"&nbsp;+&nbsp;resource);
+							}
+						}
+					}
+					catch&nbsp;(Throwable&nbsp;ex)&nbsp;{
+						throw&nbsp;new&nbsp;BeanDefinitionStoreException(
+								"Failed&nbsp;to&nbsp;read&nbsp;candidate&nbsp;component&nbsp;class:&nbsp;"&nbsp;+&nbsp;resource,&nbsp;ex);
+					}
+				}
+				else&nbsp;{
+					if&nbsp;(traceEnabled)&nbsp;{
+						logger.trace("Ignored&nbsp;because&nbsp;not&nbsp;readable:&nbsp;"&nbsp;+&nbsp;resource);
+					}
+				}
+			}
+		}
+		catch&nbsp;(IOException&nbsp;ex)&nbsp;{
+			throw&nbsp;new&nbsp;BeanDefinitionStoreException("I/O&nbsp;failure&nbsp;during&nbsp;classpath&nbsp;scanning",&nbsp;ex);
+		}
+		return&nbsp;candidates;
+	}	
+
+是不是需要扫描的组件	
+org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#isCandidateComponent
+	protected&nbsp;boolean&nbsp;isCandidateComponent(MetadataReader&nbsp;metadataReader)&nbsp;throws&nbsp;IOException&nbsp;{
+		//是不是被排除的
+		for&nbsp;(TypeFilter&nbsp;tf&nbsp;:&nbsp;this.excludeFilters)&nbsp;{
+			if&nbsp;(tf.match(metadataReader,&nbsp;this.metadataReaderFactory))&nbsp;{
+				return&nbsp;false;
+			}
+		}
+		//在被包含的组件
+		for&nbsp;(TypeFilter&nbsp;tf&nbsp;:&nbsp;this.includeFilters)&nbsp;{
+			if&nbsp;(tf.match(metadataReader,&nbsp;this.metadataReaderFactory))&nbsp;{
+				return&nbsp;isConditionMatch(metadataReader);
+			}
+		}
+		return&nbsp;false;
+	}	
+	
+	是否能够进行@Conditional判断
+&nbsp;&nbsp;&nbsp;&nbsp;org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#isConditionMatch
+	private&nbsp;boolean&nbsp;isConditionMatch(MetadataReader&nbsp;metadataReader)&nbsp;{
+		if&nbsp;(this.conditionEvaluator&nbsp;==&nbsp;null)&nbsp;{
+			this.conditionEvaluator&nbsp;=&nbsp;new&nbsp;ConditionEvaluator(getRegistry(),&nbsp;getEnvironment(),&nbsp;getResourceLoader());
+		}
+		return&nbsp;!this.conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
+	}	
+	</pre><p>&nbsp;<br></p><p><input type="checkbox"></p><pre id="leanote_ace_1559035726297_0" class="ace-tomorrow" data-mce-style="color: #a9b7c6; font-family: 'Fira Code'; font-size: 14px; line-height: 1.5; height: 21px; background-color: #2b2b2b;">BeanFactoryPostProcessor</pre><p>&nbsp;<br></p></div>
+	</div>
+
+<!-- 该js供其它处理 -->
+<script src="../leanote-html.js"></script>
+</body>
+</html>

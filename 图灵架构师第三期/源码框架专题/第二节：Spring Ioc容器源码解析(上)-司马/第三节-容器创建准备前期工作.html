@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="tool" content="leanote-desktop-app">
+<title>第三节:容器创建准备前期工作</title>
+<style>
+
+*{font-family:"lucida grande","lucida sans unicode",lucida,helvetica,"Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;}
+
+body {
+  margin: 0;
+}
+
+/*公用文字样式*/
+h1{font-size:30px}h2{font-size:24px}h3{font-size:18px}h4{font-size:14px}
+.note-container{
+    width:850px; 
+    margin:auto;
+    padding: 10px 20px;
+    box-shadow: 1px 1px 10px #eee;
+}
+#title {
+  margin: 0;
+}
+table {
+    margin-bottom: 16px;
+    border-collapse: collapse;
+}
+table th, table td {
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+}
+table th {
+    font-weight: bold;
+}
+
+table tr {
+    background-color: none;
+    border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+    background-color: rgb(247, 247, 249);
+}
+.mce-item-table, .mce-item-table td, .mce-item-table th, .mce-item-table caption {
+  border: 1px solid #ddd;
+  border-collapse: collapse;
+  padding: 6px 13px;
+}
+blockquote {
+  border-left-width:10px;
+  background-color:rgba(128,128,128,0.05);
+  border-top-right-radius:5px;
+  border-bottom-right-radius:5px;
+  padding:15px 20px;
+  border-left:5px solid rgba(128,128,128,0.075);
+}
+blockquote p {
+  margin-bottom:1.1em;
+  font-size:1em;
+  line-height:1.45
+}
+blockquote ul:last-child,blockquote ol:last-child {
+  margin-bottom:0
+}
+pre {
+  padding: 18px;
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+  border-radius: 3px;
+  display: block;
+}
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  white-space: nowrap;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+.footnote {
+  vertical-align: top;
+  position: relative;
+  top: -0.5em;
+  font-size: .8em;
+}
+
+hr {
+  margin:2em 0
+}
+img {
+  max-width:100%
+}
+pre {
+  word-break:break-word
+}
+p,pre,pre.prettyprint,blockquote {
+  margin:0 0 1.1em
+}
+hr {
+  margin:2em 0
+}
+img {
+  max-width:100%
+}
+.sequence-diagram,.flow-chart {
+  text-align:center;
+  margin-bottom:1.1em
+}
+.sequence-diagram text,.flow-chart text {
+  font-size:15px !important;
+  font-family:"Source Sans Pro",sans-serif !important
+}
+.sequence-diagram [fill="#ffffff"],.flow-chart [fill="#ffffff"] {
+  fill:#f6f6f6
+}
+.sequence-diagram [stroke="#000000"],.flow-chart [stroke="#000000"] {
+  stroke:#3f3f3f
+}
+.sequence-diagram text[stroke="#000000"],.flow-chart text[stroke="#000000"] {
+  stroke:none
+}
+.sequence-diagram [fill="#000"],.flow-chart [fill="#000"],.sequence-diagram [fill="#000000"],.flow-chart [fill="#000000"],.sequence-diagram [fill="black"],.flow-chart [fill="black"] {
+  fill:#3f3f3f
+}
+ul,ol {
+  margin-bottom:1.1em
+}
+ul ul,ol ul,ul ol,ol ol {
+  margin-bottom:1.1em
+}
+kbd {
+  padding:.1em .6em;
+  border:1px solid rgba(63,63,63,0.25);
+  -webkit-box-shadow:0 1px 0 rgba(63,63,63,0.25);
+  box-shadow:0 1px 0 rgba(63,63,63,0.25);
+  font-size:.7em;
+  font-family:sans-serif;
+  background-color:#fff;
+  color:#333;
+  border-radius:3px;
+  display:inline-block;
+  margin:0 .1em;
+  white-space:nowrap
+}
+.toc ul {
+  list-style-type:none;
+  margin-bottom:15px
+}
+</style>
+<!-- 该css供自定义样式 -->
+<link href="../leanote-html.css" rel="stylesheet">
+</head>
+
+<body>
+
+	<div class="note-container">
+		<h1 class="title" id="leanote-title">第三节:容器创建准备前期工作</h1>
+		<div class="content-html" id="leanote-content"><p><span style="color: rgb(255, 0, 0);"><span style="font-size: 24pt;">一:</span><strong><span style="font-size: 24pt;">&nbsp;AnnotationConfigApplicationContext ctx = new &nbsp; &nbsp;AnnotationConfigApplicationContext(MainConfig.class); 为我们做了什么？</span></strong></span></p><p><span style="color: rgb(0, 0, 0);"><strong><span style="font-size: 18pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">1.1)看下构造函数</span></span></span></strong></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&gt;i1:org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; i2&gt;org.springframework.context.support.GenericApplicationContext#GenericApplicationContext() 调用父类的构造方法</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; i3&gt;org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext() 自己的构造方法</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.1&gt;org.springframework.context.annotation.AnnotatedBeanDefinitionReader#AnnotatedBeanDefinitionReader 为bean定义读取器赋值</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.1.1&gt;org.springframework.context.annotation.AnnotatedBeanDefinitionReader#getOrCreateEnvironment 创建环境</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.2&gt;org.springframework.context.annotation.ConditionEvaluator &nbsp; 创建一个条件计算器对象</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.2.1&gt;this.registry = registry; &nbsp;初始条件计算器的bean定义注册器</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.2.2&gt; this.beanFactory = deduceBeanFactory(registry); &nbsp;初始化bean工厂</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.2.3&gt;this.environment = (environment != null ? environment : deduceEnvironment(registry)); 为环境对象赋值</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.2.4&gt; this.resourceLoader = (resourceLoader != null ? resourceLoader : deduceResourceLoader(registry)); 为资源加载器赋值</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i3.3&gt; AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);为容器中注册系统的bean定义信息</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;i4&gt;: &nbsp;&nbsp; this.scanner = new ClassPathBeanDefinitionScanner(this); 创建类路径下的bean定义扫描器</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i4.1&gt;: org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#registerDefaultFilters注册包扫描默认的规则&nbsp;</span></span></span></p><p><span style="color: rgb(0, 0, 0); font-size: 14pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i4.2&gt;:org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#setEnvironment 设置环境</span></span></span></p><p><span style="color: rgb(0, 0, 0);"><strong><span style="font-size: 18pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span></span></span></strong><span style="font-size: 18pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;"><span style="font-size: 14pt;">i4.3&gt;org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#setResourceLoader 设置资源加载器</span></span></span></span></span></p><p><span style="color: rgb(0, 0, 0);"><span style="font-size: 18pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;"><span style="font-size: 14pt;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i5&gt;org.springframework.context.annotation.AnnotatedBeanDefinitionReader#register 使用i3.1步生成的bean定义读取器注册配置类</span></span></span></span></span></p><p><strong><span style="color: rgb(0, 0, 0); font-size: 18pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;"><br data-mce-bogus="1"></span></span></span></strong></p><p><strong><span style="font-size: 18pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">详细源码解析:</span></span></span></strong></p><p><span style="font-size: 14pt;"><strong><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;">i1:org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext</span></span></strong></span></p><p><span color="#ff0000" style="color: #ff0000;"><span style="font-size: 18.6667px; line-height: 45.7143px;"><b>创建IOC容器对象</b></span></span></p><pre id="leanote_ace_1559111595124_0" class="ace-tomorrow">	创建
+	public&nbsp;AnnotationConfigApplicationContext(Class&lt;?&gt;...&nbsp;annotatedClasses)&nbsp;{
+	&nbsp;&nbsp;&nbsp;&nbsp;//调用无参的构造器，会调用父类的无参构造器
+		this();
+		//注册配置类
+		register(annotatedClasses);
+		//容器刷新
+		refresh();
+	}
+</pre><p><span style="color: rgb(0, 0, 0);"><span style="font-size: 18pt;"><span color="#ff0000" style="color: #ff0000;"><span style="line-height: 45.7143px;"><span style="font-size: 14pt;">i2&gt;org.springframework.context.support.GenericApplicationContext#GenericApplicationContext() 调用父类的构造方法 生成一个IOC容器</span></span></span></span></span></p><pre class="ace-tomorrow" id="leanote_ace_1559111717677_0">	public&nbsp;GenericApplicationContext()&nbsp;{
+	&nbsp;&nbsp;&nbsp;&nbsp;//创建IOC容器
+		this.beanFactory&nbsp;=&nbsp;new&nbsp;DefaultListableBeanFactory();
+	}</pre><p><span style="font-size: 14pt; color: rgb(255, 0, 0);"><strong>&nbsp;i3&gt;org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext() 自己的构造方法</strong></span></p><pre class="ace-tomorrow" id="leanote_ace_1559111826506_0">	public&nbsp;AnnotationConfigApplicationContext()&nbsp;{
+		//为IOC容器赋值&nbsp;AnnotatedBeanDefinitionReader（注解的Bean定义读取器）
+		this.reader&nbsp;=&nbsp;new&nbsp;AnnotatedBeanDefinitionReader(this);
+		//为IOC容器赋值&nbsp;&nbsp;&nbsp;类路径下的bean定义扫描器
+		this.scanner&nbsp;=&nbsp;new&nbsp;ClassPathBeanDefinitionScanner(this);
+	}</pre><p><span style="font-size: 14pt; color: rgb(255, 0, 0);"><strong>&nbsp;i3.1&gt;org.springframework.context.annotation.AnnotatedBeanDefinitionReader#AnnotatedBeanDefinitionReader 为bean定义读取器赋值</strong></span></p><pre id="leanote_ace_1559112028595_0" class="ace-tomorrow">	public&nbsp;AnnotatedBeanDefinitionReader(BeanDefinitionRegistry&nbsp;registry)&nbsp;{
+		this(registry,&nbsp;getOrCreateEnvironment(registry));
+	}</pre><p><span style="font-size: 14pt; color: rgb(255, 0, 0);"><strong>i3.1.1&gt;org.springframework.context.annotation.AnnotatedBeanDefinitionReader#getOrCreateEnvironment 创建环境</strong></span></p><pre id="leanote_ace_1559112055943_0" class="ace-tomorrow">	private&nbsp;static&nbsp;Environment&nbsp;getOrCreateEnvironment(BeanDefinitionRegistry&nbsp;registry)&nbsp;{
+		Assert.notNull(registry,&nbsp;"BeanDefinitionRegistry&nbsp;must&nbsp;not&nbsp;be&nbsp;null");
+		if&nbsp;(registry&nbsp;instanceof&nbsp;EnvironmentCapable)&nbsp;{
+			return&nbsp;((EnvironmentCapable)&nbsp;registry).getEnvironment();
+		}
+		return&nbsp;new&nbsp;StandardEnvironment();
+	}​</pre><p><span style="font-size: 14pt; color: rgb(255, 0, 0);"><strong>&nbsp;i3.2&gt;org.springframework.context.annotation.ConditionEvaluator &nbsp; 创建一个条件计算器对象</strong></span></p><pre id="leanote_ace_1559112129534_0" class="ace-tomorrow">		public&nbsp;ConditionContextImpl(BeanDefinitionRegistry&nbsp;registry,&nbsp;Environment&nbsp;environment,&nbsp;ResourceLoader&nbsp;resourceLoader)&nbsp;{
+			this.registry&nbsp;=&nbsp;registry;
+			this.beanFactory&nbsp;=&nbsp;deduceBeanFactory(registry);
+			this.environment&nbsp;=&nbsp;(environment&nbsp;!=&nbsp;null&nbsp;?&nbsp;environment&nbsp;:&nbsp;deduceEnvironment(registry));
+			this.resourceLoader&nbsp;=&nbsp;(resourceLoader&nbsp;!=&nbsp;null&nbsp;?&nbsp;resourceLoader&nbsp;:&nbsp;deduceResourceLoader(registry));
+		}</pre><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong>&nbsp;&nbsp;i3.3&gt; AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);为容器中注册系统的bean定义信息</strong></span></p><pre id="leanote_ace_1559112220278_0" class="ace-tomorrow" draggable="false">	public static Set&lt;BeanDefinitionHolder&gt; registerAnnotationConfigProcessors(
+			BeanDefinitionRegistry registry, Object source) {
+        
+        //获取一个IOC容器
+		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
+		if (beanFactory != null) {
+			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
+				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+			}
+			
+			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+			}
+		}
+
+		Set&lt;BeanDefinitionHolder&gt; beanDefs = new LinkedHashSet&lt;BeanDefinitionHolder&gt;(8);
+        
+        //注册一个配置类解析器的bean定义（ConfigurationClassPostProcessor）
+		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+        
+        //设置AutoWired注解解析器的bean定义信息
+		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+        
+        注册解析@Required 注解的处理器
+		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+        
+        //检查是否支持JSR250规范，如何支持注册 解析JSR250规范的注解
+		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
+		if (jsr250Present &amp;&amp; !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+        
+        //检查是否支持jpa，若支持注册解析jpa规范的注解
+		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
+		if (jpaPresent &amp;&amp; !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition();
+			try {
+				def.setBeanClass(ClassUtils.forName(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME,
+						AnnotationConfigUtils.class.getClassLoader()));
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException(
+						"Cannot load optional framework class: " + PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, ex);
+			}
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
+		}
+        
+        //注册解析@EventListener的注解
+		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
+		}
+        
+		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
+			def.setSource(source);
+			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_FACTORY_BEAN_NAME));
+		}
+
+		return beanDefs;
+	}</pre><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong>i4&gt;: &nbsp;&nbsp; this.scanner = new ClassPathBeanDefinitionScanner(this); 创建类路径下的bean定义扫描器</strong></span></p><pre id="leanote_ace_1559113729798_0" class="ace-tomorrow">	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
+			Environment environment, ResourceLoader resourceLoader) {
+
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+		this.registry = registry;
+        
+        //使用默认的扫描规则
+		if (useDefaultFilters) {
+			registerDefaultFilters();
+		}
+		//设置环境
+		setEnvironment(environment);
+		//设置资源加载器
+		setResourceLoader(resourceLoader);
+	}</pre><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong>&nbsp; i4.1&gt;: org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#registerDefaultFilters注册包扫描默认的规则&nbsp;</strong></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong>&nbsp;&nbsp;</strong></span></p><pre id="leanote_ace_1559113812316_0" class="ace-tomorrow">	protected void registerDefaultFilters() {
+	    //可以谢谢@Compent  @Service @Repository @Controller @Aspectj
+		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
+		try {
+		    //jsr250规范的组件
+			this.includeFilters.add(new AnnotationTypeFilter(
+					((Class&lt;? extends Annotation&gt;) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));
+			logger.debug("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.
+		}
+		try {
+		    //可以支持jsr330的注解
+			this.includeFilters.add(new AnnotationTypeFilter(
+					((Class&lt;? extends Annotation&gt;) ClassUtils.forName("javax.inject.Named", cl)), false));
+			logger.debug("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
+		}
+		catch (ClassNotFoundException ex) {
+			// JSR-330 API not available - simply skip.
+		}
+	}</pre><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong>i5&gt;org.springframework.context.annotation.AnnotatedBeanDefinitionReader#register 使用i3.1步生成的bean定义读取器注册配置类</strong></span></p><pre id="leanote_ace_1559113928207_0" class="ace-tomorrow" draggable="false">	public void registerBean(Class&lt;?&gt; annotatedClass, String name, Class&lt;? extends Annotation&gt;... qualifiers) {
+		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
+			return;
+		}
+
+		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
+		abd.setScope(scopeMetadata.getScopeName());
+		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
+		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+		if (qualifiers != null) {
+			for (Class&lt;? extends Annotation&gt; qualifier : qualifiers) {
+				if (Primary.class == qualifier) {
+					abd.setPrimary(true);
+				}
+				else if (Lazy.class == qualifier) {
+					abd.setLazyInit(true);
+				}
+				else {
+					abd.addQualifier(new AutowireCandidateQualifier(qualifier));
+				}
+			}
+		}
+        //注册自己传入的主配置类bean定义到容器中
+		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
+	}</pre><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong><br data-mce-bogus="1"></strong></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong><br data-mce-bogus="1"></strong></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong><br data-mce-bogus="1"></strong></span></p><p><span style="color: rgb(255, 0, 0); font-size: 14pt;" data-mce-style="color: #ff0000; font-size: 14pt;"><strong><br data-mce-bogus="1"></strong></span></p></div>
+	</div>
+
+<!-- 该js供其它处理 -->
+<script src="../leanote-html.js"></script>
+</body>
+</html>
