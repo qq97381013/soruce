@@ -1,0 +1,63 @@
+1)讲剩余的IOC 容器刷新的方法
+
+2）课堂总结  aop  事务面试是如何回答的
+          在容器中启动的时候 。。。。。。。。。。。。。。
+第一点:先跟他说 aop 是什么东西  vs oop 
+第二点:跟他把aop 的基本概念说清楚 ?
+第三点:@EnableAspectJAutoProxy=====> 导入了AnnotationAwareAspectJAutoProxyCreator组件
+我们分析出AnnotationAwareAspectJAutoProxyCreator 的继承关系图发现了他具有BeanPostProcessor 接口特性和InstantiationAwareBeanPostProcessor
+的特性.我们发现InstantiationAwareBeanPostProcessor 在实例化之前(调用构造方法之前)执行的.
+
+创建第一个bean   根据Bean的生命周期中的createBean的环节  resolveBeforeInstantiation连触发我的InstantiationAwareBeanPostProcessor的的before方法.
+此事在这个环节就会去把我们的切面信息(@Aspectj)的信息找出来 然后进行缓存.
+
+
+第二步：(创建代理对象)
+BeanPostProcessor .after方法中
+    创建要切的对象的时候,根据方法进行匹配去找自己的切面(增强器),然后把增强器和被切的对象创成一个代理对象.
+
+
+第三步: 代理对象调用（jdk代理 ，cglib代理） proxyTragetClass为true或者false  来指定 
+通过责任链模式+递归的来进行调用
+先执行我们的异常通知.......(catch里面执行异常通知的方法)
+返回通知:(由于正是在这里返回通知中没有进行任何的try catch处理，，，，那么加入抛出异常 就不会执行返回通知的方法而是直接执行到异常通知了)
+后置通知:正是因为在后置通知中,代码在finally里中 所以他才是总是被执行的......
+前置通知:执行我们的前置通知.
+递归终止条件满足:执行我们的目标方法:
+
+
+题目：在pom文件中不到入aop的相关包的情况下  自己实现一个aop的功能.
+告诉:工厂模式    模版方法   责任链模式  动态代理模式      策略模式        递归 反射   依赖查找   
+
+
+事务增强器和自定义的切面是如何 执行顺序的?   事务执行的是哪种切面
+
+
+
+        
+
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+3）spring 5.0的新特性  日志 以及响应式编程
+
+Spel表达式
+
+实现了 ApplicationContextAware
+
+我们的自己的组件 比如说userDao  userService     想要容器底层的组件 比如beanFactory  applicationContext
