@@ -1,0 +1,14 @@
+文档：01-VIP-Redis核心数据结构与核心原理
+链接：http://note.youdao.com/noteshare?id=ac721d97d0b6c27ee57b14e58542c560&sub=A2311B09C0424FF188A5495601F774E0
+
+文档：02-VIP-Redis持久化、主从与哨兵架构详解
+链接：http://note.youdao.com/noteshare?id=893c138fa39925f86b374fd46db322b4&sub=1973D9FDBADF4E1FB8E7D2BC97783593
+
+文档：03-VIP-Redis缓存高可用集群
+链接：http://note.youdao.com/noteshare?id=218d9ba28237a441217d0e024d410769&sub=8A5B0D9F4F044798BFBDBE12FC00F566
+
+文档：03-VIP-Redis高可用集群之水平扩展
+链接：http://note.youdao.com/noteshare?id=174eaa7104ce961f8012d521d8155bd9&sub=5CB163DE61434F4E92C5B62C22EC095E
+
+文档：05-VIP-Redis缓存设计与性能优化.note
+链接：http://note.youdao.com/noteshare?id=7b6df00d88f1554d79b2d688c23148a2&sub=7AECEFE5E2FC4416B9FFED2323C53B40
