@@ -1,0 +1,5 @@
+文档：01-VIP-高性能消息中间件Kafka实战.not...
+链接：http://note.youdao.com/noteshare?id=e5863162eca29c2b31e8b59c9707817d&sub=3861E549BBC941A4B5CCAEC45E178E1E
+
+文档：02-VIP-kafka设计原理详解.note
+链接：http://note.youdao.com/noteshare?id=d9fed88c81ff75e6c0e6364012d19fef&sub=EC250FFF99054B0C801CC5A51553150A
