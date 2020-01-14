@@ -9,15 +9,15 @@
 
 [http://git.tulingxueyuan.cn/java-vip/tuling-tomcat](http://git.tulingxueyuan.cn/java-vip/tuling-tomcat)
 
-[http://git.tulingxueyuan.cn/java-vip/tuling-juc-3](http://git.tulingxueyuan.cn/java-vip/tuling-juc-3)
-
 [http://git.tulingxueyuan.cn/java-vip/tuling-mybatis-3](http://git.tulingxueyuan.cn/java-vip/tuling-mybatis-3)
 
 [http://git.tulingxueyuan.cn/java-vip/tuling-mvc-3](http://git.tulingxueyuan.cn/java-vip/tuling-mvc-3)
 
 ### 并发编程：
+[http://git.tulingxueyuan.cn/java-vip/tuling-juc-3](http://git.tulingxueyuan.cn/java-vip/tuling-juc-3)
 
 ### 性能调优：
+源码都在笔记里
 
 ### 分布式专题：
  [http://git.tulingxueyuan.cn/java-vip/tuling-3-netty](http://git.tulingxueyuan.cn/java-vip/tuling-3-netty)
