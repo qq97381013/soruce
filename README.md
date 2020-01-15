@@ -38,9 +38,14 @@
 
 [http://git.tulingxueyuan.cn/java-vip/tuling-zookeeper-3](http://git.tulingxueyuan.cn/java-vip/tuling-zookeeper-3)
 
+[http://git.tulingxueyuan.cn/java-vip/tuling-3-zhaoyun-elk](http://git.tulingxueyuan.cn/java-vip/tuling-3-zhaoyun-elk)
+
 ### 微服务系列：
 
 ### 项目实战：
+
+### 设计模式:
+[http://git.tulingxueyuan.cn/java-vip/designpattern](http://git.tulingxueyuan.cn/java-vip/designpattern)
 
 # 第一二期源码：
 [http://git.tulingxueyuan.cn/java-vip/tuling-vip-cloud](http://git.tulingxueyuan.cn/java-vip/tuling-vip-cloud)
