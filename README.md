@@ -46,7 +46,7 @@
 
 ### 微服务系列：
 [http://git.tulingxueyuan.cn/java-vip/tuling-3-springcloud-alibaba](http://git.tulingxueyuan.cn/java-vip/tuling-3-springcloud-alibaba)
-
+http://git.tulingxueyuan.cn/java-vip/tuling-3-springcloud-alibaba-demo.git
 
 ### 项目实战：
 
