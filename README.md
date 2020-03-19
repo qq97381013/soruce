@@ -55,7 +55,9 @@ http://git.tulingxueyuan.cn/java-vip/mall-admin-web
 
 http://git.tulingxueyuan.cn/java-vip/single-mall
 
+http://git.tulingxueyuan.cn/java-vip/tuling-mall
 
+http://git.tulingxueyuan.cn/java-vip/tulingmall-front
 
 ### 设计模式:
 [http://git.tulingxueyuan.cn/java-vip/designpattern](http://git.tulingxueyuan.cn/java-vip/designpattern)
