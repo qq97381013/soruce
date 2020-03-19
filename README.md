@@ -51,10 +51,9 @@ http://git.tulingxueyuan.cn/java-vip/tuling-3-springcloud-alibaba-demo.git
 
 
 ### 项目实战：
-http://git.tulingxueyuan.cn/java-vip/mall-admin-web（http://git.tulingxueyuan.cn/java-vip/mall-admin-web）
+http://git.tulingxueyuan.cn/java-vip/mall-admin-web
 
-http://git.tulingxueyuan.cn/java-vip/single-mall（http://git.tulingxueyuan.cn/java-vip/single-mall）
-
+http://git.tulingxueyuan.cn/java-vip/single-mall
 
 
 
