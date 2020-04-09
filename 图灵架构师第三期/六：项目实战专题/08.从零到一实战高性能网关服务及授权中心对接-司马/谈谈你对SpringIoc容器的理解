@@ -1,0 +1,102 @@
+Spring的人生哲学  源于容器，止于容器。
+一说到Spring ioc容器 很多人马上在大脑里浮现出二个概念 控制反转,依赖注入,但是很少有人结合生活
+上的案例去思考这个问题，大多数就是背概念，所以导致你对Spring的一知半解。
+老师的理解:
+  ①:首先 我们从他们的概念入手来理解  控制反转,依赖注入 很多人把这二概念理解为一个事 这是错误的看法
+我们首先来 说说“控制反转”这个概念,我首先会把“控制反转” 这四个字拆分为 2个词语
+a)控制
+  我们看到这个词语，就会情不自禁的想  "控制什么东西?"----->控制对象的创建的权力
+class  you{
+
+    //有钱
+    private Money money = new Money();
+    //长得帅
+    private Handsome handsome = new HandSome();
+    //工作好
+    private GodJob godJob = new GodJob();
+
+    BeautyGilr beautyGirl = new BeautyGirl(money,handsome,godJob);
+
+
+    public void doHappyThings(BeautyGirl beautyGirl) {
+
+        下飞行器
+    }
+
+
+
+
+    MainTest{
+        You  you = new You();
+        you.doHappyThings(beautyGirl);
+    }
+}
+从上面的伪代码不难看出，You这个类需要调用doHappyThings 传入的入参 是一个beautyGirl对象,那么这个对象的创建
+由我们程序员自己来创建。我们可以很快的就发现这个创建 beautyGirl的过程十分复杂。  这个就是对象创建的权力
+是由我们的程序员控制的
+b)反转
+  什么东西被反转了？控制对象的创建的权力被反转了,那么对象的创建不再有程序员进行创建了，而是有第三方(Spring容器工厂)
+给我们创建好了，我们程序员只要 通过每种方式向容器索取 需要的对象就 可以拿到该对象
+class  you{
+
+    //向容器索取一个漂亮的女孩子.
+    @Autowired
+    private BeautyGirl beautyGilr;
+
+
+    public void doHappyThings(BeautyGirl beautyGirl) {
+        ..和漂亮的女孩子做愉快的事情
+        log.info("你和美女下飞行器 这是一个愉快的事情")
+    }
+
+    MainTest{
+        You  you = new You();
+        you.doHappyThings(beautyGirl);
+    }
+}
+讲到这里 我们已经很好的理解了 控制反转给我们带来的好处了，直白的说，就是我们程序员业务代码 和我们组件创建的代码彻底的分离开来
+进行解构 我们程序员只要专注业务代码，不需要关心我们所需的组件是如何创建来的。真正做到“使用 即有” 不需自己创建。
+
+依赖  注入
+   我们首先来理解“依赖” 二个字  何为依赖，在这里我们是不是形成了一个依赖关系
+   You这个类  依赖了  BeautyGirl这个类，用大白话说就是  You这个对象中需要使用到BeautyGirl这个对象
+   那么这种依赖怎么办  怎么给BeautyGirl对象赋值  ，所以才有 “注入”这个概念。就是把BeautyGirl对象注入到
+   You这个类中。（被注入的对象BeautyGirl 哪来的----->不就是容器的 上一个概念控制反转 通过spring容器工厂创建出来的对象么）
+class  you{
+    private BeautyGirl beautyGilr;
+}
+
+所以从上述的我们可以得出结论    正是由于  有了控制反转  把对象的创建交给容器管理  所以才支持 依赖注入功能。
+那么依赖注入这个功能 会引入一个容器的先天缺陷 ---->循环依赖
+
+何为循环依赖-------
+class  you{
+    private BeautyGirl beautyGilr;
+}
+class BeautyGirl{
+    private You you;
+}
+如何解决: 。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。
+讲到这里  有很多同学自认为 很了解Spring了。这个一百分的面试题  仅仅你才答了60分。
+
+进阶回答
+  正是Spring的IOC的核心功能(控制反转 依赖注入)来创建 管理 我们的组件(Controller  service  dao ....)
+  由于他有这种功能，那么很多第三方开源框架 看中了这点功能，所以第三方开源框架总是想法设法的 想把自己的
+  组件(比如Redis的RedisTemplate   Rabbitmq的  AmqpRemplate)这些组件的管理 交给Spring 主要是为了给程序员提供
+  了方便，因为程序可以通过spring直接去拿我们的RedisTempalte  而不是要自己去创建该对象。
+比如:Spring 和MyBatis 整合 利用的就是Spring 的扩展接口BeanFacotryPostProcessor接口
+    :Spring 整合 Nacos 用的就是ApplicationListener接口
+    :spring和Eureka 利用的是   SmartLifecycle接口
+    :Spring整合  Ribbon利用的就是 SmartInitializingSingleton接口整合
+    :spring 整合Sentinel 利用的BeanPostProcessor接口
+
+
+应用框架的五个理解过程
+1)会用
+2)懂原理
+3)懂源码
+4)改源码
+5)写源码
+
+
+
